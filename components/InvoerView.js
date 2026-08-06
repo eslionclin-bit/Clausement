@@ -68,6 +68,11 @@ function TeamindelingTool({ players }) {
 export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving }) {
   const emptyRows = () => Object.fromEntries(players.map((p) => [p.id, { openingsspel: 0, doel: 0, doelRaw: "", wedstrijd: "" }]));
 
+  function defaultOpenSet() {
+    const mijnSpeler = players.find((p) => p.name === myName);
+    return mijnSpeler ? new Set([mijnSpeler.id]) : new Set();
+  }
+
   const [editingId, setEditingId] = useState(null);
   const [editingMeta, setEditingMeta] = useState(null);
   const [date, setDate] = useState(todayISO());
@@ -77,6 +82,23 @@ export default function InvoerView({ players, trainings, myName, goals, personal
   const [showStrike, setShowStrike] = useState(false);
   const [showHistorie, setShowHistorie] = useState(false);
   const [openMonths, setOpenMonths] = useState(() => new Set([todayISO().slice(0, 7)]));
+  const [openPlayers, setOpenPlayers] = useState(defaultOpenSet);
+
+  function togglePlayer(pid) {
+    setOpenPlayers((prev) => {
+      const next = new Set(prev);
+      next.has(pid) ? next.delete(pid) : next.add(pid);
+      return next;
+    });
+  }
+
+  function summarizeRow(row, ex) {
+    const parts = [];
+    if (row?.openingsspel > 0) parts.push(`openingsspel ${row.openingsspel}`);
+    if (ex && row?.doelRaw !== "" && row?.doelRaw !== undefined) parts.push(`doel ${row.doelRaw}`);
+    if (row?.wedstrijd) parts.push(row.wedstrijd);
+    return parts.length > 0 ? parts.join(" · ") : "nog niets ingevuld";
+  }
 
   useEffect(() => {
     if (editingId) return;
@@ -119,6 +141,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
     });
     setRows(filled);
     setShowHistorie(false);
+    setOpenPlayers(defaultOpenSet());
   }
 
   function cancelEdit() {
@@ -126,6 +149,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
     setEditingMeta(null);
     setDate(todayISO());
     setRows(emptyRows());
+    setOpenPlayers(defaultOpenSet());
   }
 
   function handleDateChange(nieuweDatum) {
@@ -144,6 +168,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
       setEditingMeta(null);
       setRows(emptyRows());
     }
+    setOpenPlayers(defaultOpenSet());
   }
 
   async function handleSave() {
@@ -219,51 +244,70 @@ export default function InvoerView({ players, trainings, myName, goals, personal
           .map((p) => {
             const goal = goals[p.id];
             const ex = goal ? exercises.find((e) => e.id === goal.exerciseId) : null;
+            const open = openPlayers.has(p.id);
             return (
               <div key={p.id} style={{ background: COLORS.white, borderRadius: 6, padding: "10px 12px", boxShadow: "0 1px 2px rgba(0,0,0,.06)" }}>
-                <div className="cy-medium" style={{ fontSize: 13.5, marginBottom: 6 }}>{p.name}</div>
-                <div style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-end" }}>
-                  <MiniNum label="Openingsspel" value={rows[p.id]?.openingsspel ?? 0} onChange={(v) => updateRow(p.id, "openingsspel", v)} warnAbove={15} />
-                  <div style={{ flex: 2 }}>
-                    <div className="cy-regular" style={{ fontSize: 10, color: "#999", marginBottom: 2 }}>
-                      {ex ? `Score — ${ex.metric}` : "Doel (geen doel gekozen)"}
-                      {ex && personalRecords[`${p.id}:${ex.id}`] !== undefined && (
-                        <span style={{ color: COLORS.blue }}> · vorige: {personalRecords[`${p.id}:${ex.id}`]}</span>
-                      )}
-                    </div>
-                    <input
-                      type="number"
-                      disabled={!ex}
-                      placeholder={ex ? "0" : "—"}
-                      value={rows[p.id]?.doelRaw ?? ""}
-                      onFocus={(e) => e.target.select()}
-                      onChange={(e) => updateRow(p.id, "doelRaw", e.target.value)}
-                      style={{ ...inputStyle, padding: "6px 8px", fontSize: 13, textAlign: "center", opacity: ex ? 1 : 0.5, background: ex ? COLORS.white : "#f2f2f2" }}
-                    />
+                <div
+                  onClick={() => togglePlayer(p.id)}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, cursor: "pointer" }}
+                >
+                  <div>
+                    <div className="cy-medium" style={{ fontSize: 13.5 }}>{p.name}</div>
+                    {!open && (
+                      <div className="cy-regular" style={{ fontSize: 11, color: "#888", marginTop: 2 }}>
+                        {summarizeRow(rows[p.id], ex)}
+                      </div>
+                    )}
                   </div>
+                  <span style={{ color: "#bbb", fontSize: 11, flexShrink: 0 }}>{open ? "▾" : "▸"}</span>
                 </div>
-                {ex && <div className="cy-regular" style={{ fontSize: 10, color: "#aaa", marginBottom: 6 }}>Doel: {ex.name}</div>}
-                {ex && rows[p.id]?.doelRaw !== "" && rows[p.id]?.doelRaw !== undefined && (
-                  <div className="cy-medium" style={{ fontSize: 11, marginBottom: 6, color: previewDoelPunten(p.id, ex, rows[p.id].doelRaw, personalRecords, goals, cycleBonuses).punten > 1 ? "#2e8b57" : COLORS.blue }}>
-                    {previewDoelPunten(p.id, ex, rows[p.id].doelRaw, personalRecords, goals, cycleBonuses).tekst}
+
+                {open && (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-end" }}>
+                      <MiniNum label="Openingsspel" value={rows[p.id]?.openingsspel ?? 0} onChange={(v) => updateRow(p.id, "openingsspel", v)} warnAbove={15} />
+                      <div style={{ flex: 2 }}>
+                        <div className="cy-regular" style={{ fontSize: 10, color: "#999", marginBottom: 2 }}>
+                          {ex ? `Score — ${ex.metric}` : "Doel (geen doel gekozen)"}
+                          {ex && personalRecords[`${p.id}:${ex.id}`] !== undefined && (
+                            <span style={{ color: COLORS.blue }}> · vorige: {personalRecords[`${p.id}:${ex.id}`]}</span>
+                          )}
+                        </div>
+                        <input
+                          type="number"
+                          disabled={!ex}
+                          placeholder={ex ? "0" : "—"}
+                          value={rows[p.id]?.doelRaw ?? ""}
+                          onFocus={(e) => e.target.select()}
+                          onChange={(e) => updateRow(p.id, "doelRaw", e.target.value)}
+                          style={{ ...inputStyle, padding: "6px 8px", fontSize: 13, textAlign: "center", opacity: ex ? 1 : 0.5, background: ex ? COLORS.white : "#f2f2f2" }}
+                        />
+                      </div>
+                    </div>
+                    {ex && <div className="cy-regular" style={{ fontSize: 10, color: "#aaa", marginBottom: 6 }}>Doel: {ex.name}</div>}
+                    {ex && rows[p.id]?.doelRaw !== "" && rows[p.id]?.doelRaw !== undefined && (
+                      <div className="cy-medium" style={{ fontSize: 11, marginBottom: 6, color: previewDoelPunten(p.id, ex, rows[p.id].doelRaw, personalRecords, goals, cycleBonuses).punten > 1 ? "#2e8b57" : COLORS.blue }}>
+                        {previewDoelPunten(p.id, ex, rows[p.id].doelRaw, personalRecords, goals, cycleBonuses).tekst}
+                      </div>
+                    )}
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {[
+                        { v: "gewonnen", label: "Gewonnen" },
+                        { v: "verloren", label: "Verloren" },
+                        { v: "", label: "Niet gespeeld" },
+                      ].map((opt) => (
+                        <button
+                          key={opt.label}
+                          onClick={() => updateRow(p.id, "wedstrijd", opt.v)}
+                          className="cy-medium"
+                          style={{ flex: 1, fontSize: 11, padding: "6px 4px", borderRadius: 4, border: `1.5px solid ${COLORS.blue}`, background: (rows[p.id]?.wedstrijd ?? "") === opt.v ? COLORS.blue : COLORS.white, color: (rows[p.id]?.wedstrijd ?? "") === opt.v ? COLORS.white : COLORS.blue, cursor: "pointer" }}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
-                <div style={{ display: "flex", gap: 6 }}>
-                  {[
-                    { v: "gewonnen", label: "Gewonnen" },
-                    { v: "verloren", label: "Verloren" },
-                    { v: "", label: "Niet gespeeld" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.label}
-                      onClick={() => updateRow(p.id, "wedstrijd", opt.v)}
-                      className="cy-medium"
-                      style={{ flex: 1, fontSize: 11, padding: "6px 4px", borderRadius: 4, border: `1.5px solid ${COLORS.blue}`, background: (rows[p.id]?.wedstrijd ?? "") === opt.v ? COLORS.blue : COLORS.white, color: (rows[p.id]?.wedstrijd ?? "") === opt.v ? COLORS.white : COLORS.blue, cursor: "pointer" }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
               </div>
             );
           })}
