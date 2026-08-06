@@ -169,6 +169,7 @@ function AppShell({ view, setView }) {
             onSubmit={data.submitTraining}
             onDelete={data.deleteTraining}
             saving={data.saving}
+            isTrainer={isTrainer}
           />
         )}
         {activeView === "beheer" && isTrainer && (

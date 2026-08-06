@@ -65,12 +65,20 @@ function TeamindelingTool({ players }) {
   );
 }
 
-export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving }) {
+export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving, isTrainer }) {
   const emptyRows = () => Object.fromEntries(players.map((p) => [p.id, { openingsspel: 0, doel: 0, doelRaw: "", wedstrijd: "" }]));
 
   function defaultOpenSet() {
     const mijnSpeler = players.find((p) => p.name === myName);
     return mijnSpeler ? new Set([mijnSpeler.id]) : new Set();
+  }
+
+  // Spelers mogen een bestaande training alleen op de invoerdag zelf nog
+  // wijzigen/verwijderen; de trainer altijd. Wordt ook server-side afgedwongen
+  // (submit_training/delete_training) — dit is puur om vooraf een duidelijke
+  // read-only weergave te tonen i.p.v. pas bij het opslaan te weigeren.
+  function binnenBewerkVenster(training) {
+    return isTrainer || (training?.enteredAt && training.enteredAt.slice(0, 10) === todayISO());
   }
 
   const [editingId, setEditingId] = useState(null);
@@ -194,6 +202,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
   }
 
   const sortedTrainings = [...trainings].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const bewerkbaarNu = !editingId || binnenBewerkVenster(editingMeta);
 
   return (
     <div>
@@ -204,10 +213,17 @@ export default function InvoerView({ players, trainings, myName, goals, personal
           </div>
         </div>
       )}
-      {editingId && (
+      {editingId && bewerkbaarNu && (
         <Banner tone="light">
           Er staat al een training op {date} — de bestaande gegevens zijn geladen. Opslaan werkt bij.{" "}
           <span onClick={cancelEdit} style={{ textDecoration: "underline", cursor: "pointer" }}>annuleren</span>
+        </Banner>
+      )}
+      {editingId && !bewerkbaarNu && (
+        <Banner tone="yellow">
+          Deze training is niet meer op dezelfde dag ingevoerd, dus kan je 'm als speler niet meer wijzigen —
+          vraag de trainer. Je ziet de ingevoerde waarden hieronder wel ter controle.{" "}
+          <span onClick={cancelEdit} style={{ textDecoration: "underline", cursor: "pointer" }}>sluiten</span>
         </Banner>
       )}
       {errorMsg && <Banner tone="yellow">{errorMsg}</Banner>}
@@ -317,11 +333,11 @@ export default function InvoerView({ players, trainings, myName, goals, personal
 
       <button
         onClick={handleSave}
-        disabled={saving || players.length === 0}
+        disabled={saving || players.length === 0 || !bewerkbaarNu}
         className="cy-black"
-        style={{ width: "100%", marginTop: 18, background: COLORS.yellow, color: COLORS.black, border: "none", borderRadius: 6, padding: "14px 8px", fontSize: 15, cursor: players.length === 0 ? "not-allowed" : "pointer", opacity: players.length === 0 ? 0.5 : 1 }}
+        style={{ width: "100%", marginTop: 18, background: COLORS.yellow, color: COLORS.black, border: "none", borderRadius: 6, padding: "14px 8px", fontSize: 15, cursor: players.length === 0 || !bewerkbaarNu ? "not-allowed" : "pointer", opacity: players.length === 0 || !bewerkbaarNu ? 0.5 : 1 }}
       >
-        {saving ? "OPSLAAN…" : editingId ? "WIJZIGING OPSLAAN" : "TRAINING OPSLAAN"}
+        {saving ? "OPSLAAN…" : !bewerkbaarNu ? "ALLEEN TRAINER KAN DIT NOG WIJZIGEN" : editingId ? "WIJZIGING OPSLAAN" : "TRAINING OPSLAAN"}
       </button>
       {savedMsg && <div className="cy-medium" style={{ textAlign: "center", color: COLORS.blue, marginTop: 10, fontSize: 13 }}>{savedMsg}</div>}
 
@@ -363,21 +379,28 @@ export default function InvoerView({ players, trainings, myName, goals, personal
                 </button>
                 {open && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
-                    {items.map((t) => (
-                      <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: COLORS.white, borderRadius: 6, padding: "8px 10px" }}>
-                        <div>
-                          <div className="cy-medium" style={{ fontSize: 13 }}>{t.date}</div>
-                          <div className="cy-regular" style={{ fontSize: 10.5, color: "#888" }}>{Object.keys(t.spelers || {}).length} speelsters</div>
-                          <div className="cy-regular" style={{ fontSize: 10, color: "#aaa" }}>
-                            ingevoerd door {t.enteredBy || "onbekend"}{t.updatedBy ? ` · gewijzigd door ${t.updatedBy}` : ""}
+                    {items.map((t) => {
+                      const bewerkbaar = binnenBewerkVenster(t);
+                      return (
+                        <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: COLORS.white, borderRadius: 6, padding: "8px 10px" }}>
+                          <div>
+                            <div className="cy-medium" style={{ fontSize: 13 }}>{t.date}</div>
+                            <div className="cy-regular" style={{ fontSize: 10.5, color: "#888" }}>{Object.keys(t.spelers || {}).length} speelsters</div>
+                            <div className="cy-regular" style={{ fontSize: 10, color: "#aaa" }}>
+                              ingevoerd door {t.enteredBy || "onbekend"}{t.updatedBy ? ` · gewijzigd door ${t.updatedBy}` : ""}
+                            </div>
                           </div>
+                          {bewerkbaar ? (
+                            <div style={{ display: "flex", gap: 10 }}>
+                              <span onClick={() => startEdit(t)} className="cy-medium" style={{ fontSize: 12, color: COLORS.blue, cursor: "pointer" }}>wijzigen</span>
+                              <span onClick={() => handleDelete(t.id)} className="cy-medium" style={{ fontSize: 12, color: "#c0392b", cursor: "pointer" }}>verwijderen</span>
+                            </div>
+                          ) : (
+                            <span className="cy-regular" style={{ fontSize: 11, color: "#aaa" }}>alleen trainer</span>
+                          )}
                         </div>
-                        <div style={{ display: "flex", gap: 10 }}>
-                          <span onClick={() => startEdit(t)} className="cy-medium" style={{ fontSize: 12, color: COLORS.blue, cursor: "pointer" }}>wijzigen</span>
-                          <span onClick={() => handleDelete(t.id)} className="cy-medium" style={{ fontSize: 12, color: "#c0392b", cursor: "pointer" }}>verwijderen</span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
