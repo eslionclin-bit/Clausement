@@ -2,68 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { COLORS } from "@/lib/constants";
-import { previewDoelPunten, shuffle } from "@/lib/logic";
+import { previewDoelPunten } from "@/lib/logic";
 import { todayISO } from "@/lib/util";
 import { Banner, Empty, Field, MiniNum, inputStyle } from "./shared";
-
-function TeamindelingTool({ players }) {
-  const [open, setOpen] = useState(false);
-  const [aantalGroepen, setAantalGroepen] = useState(2);
-  const [groepen, setGroepen] = useState(null);
-
-  function verdeel() {
-    const geschud = shuffle(players);
-    const nieuweGroepen = Array.from({ length: aantalGroepen }, () => []);
-    geschud.forEach((p, i) => nieuweGroepen[i % aantalGroepen].push(p));
-    setGroepen(nieuweGroepen);
-  }
-
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="cy-medium"
-        style={{ width: "100%", textAlign: "left", background: COLORS.white, border: `1.5px solid ${COLORS.lightBlue}`, borderRadius: 6, padding: "10px 12px", fontSize: 12.5, color: COLORS.blue, cursor: "pointer" }}
-      >
-        {open ? "▾" : "▸"} Teamindeling openingsspel — wissel elke keer door elkaar
-      </button>
-      {open && (
-        <div style={{ background: COLORS.white, borderRadius: 6, padding: 10, marginTop: 6 }}>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
-            <span className="cy-regular" style={{ fontSize: 12, color: "#666" }}>Aantal groepen:</span>
-            <select value={aantalGroepen} onChange={(e) => setAantalGroepen(Number(e.target.value))} style={{ ...inputStyle, width: 70, padding: "6px 8px" }}>
-              {[2, 3, 4].map((n) => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
-            <button
-              onClick={verdeel}
-              disabled={players.length === 0}
-              className="cy-medium"
-              style={{ background: COLORS.yellow, color: COLORS.black, border: "none", borderRadius: 6, padding: "8px 12px", fontSize: 12.5, cursor: players.length === 0 ? "not-allowed" : "pointer" }}
-            >
-              {groepen ? "Opnieuw wisselen" : "Verdeel"}
-            </button>
-          </div>
-          {groepen && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {groepen.map((groep, i) => (
-                <div key={i} style={{ background: "#f2f2f7", borderRadius: 4, padding: "6px 8px" }}>
-                  <span className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue }}>Groep {i + 1}: </span>
-                  <span className="cy-regular" style={{ fontSize: 11.5 }}>{groep.map((p) => p.name).join(", ") || "—"}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="cy-regular" style={{ fontSize: 10, color: "#999", marginTop: 8, lineHeight: 1.4 }}>
-            Puur een hulpmiddel voor het moment zelf — wordt niet opgeslagen. Elke keer &quot;verdeel&quot; geeft
-            een nieuwe, willekeurige indeling.
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving, isTrainer }) {
   const emptyRows = () => Object.fromEntries(players.map((p) => [p.id, { openingsspel: 0, doel: 0, doelRaw: "", wedstrijd: "" }]));
@@ -231,8 +172,6 @@ export default function InvoerView({ players, trainings, myName, goals, personal
       <Field label="Datum">
         <input type="date" value={date} onChange={(e) => handleDateChange(e.target.value)} style={inputStyle} />
       </Field>
-
-      <TeamindelingTool players={players} />
 
       <div className="cy-medium" style={{ fontSize: 13, color: COLORS.blue, margin: "18px 0 8px" }}>PUNTEN PER SPEELSTER</div>
       <div className="cy-regular" style={{ fontSize: 11, color: "#777", marginBottom: 10, lineHeight: 1.5 }}>
