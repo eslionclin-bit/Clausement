@@ -34,6 +34,7 @@ export default function BeheerView({
   const [seizoenStartDatum, setSeizoenStartDatum] = useState(todayISO());
   const [seizoenBevestiging, setSeizoenBevestiging] = useState("");
   const [seizoenBezig, setSeizoenBezig] = useState(false);
+  const [seizoenMsg, setSeizoenMsg] = useState("");
 
   async function handleResetPeriode() {
     if (!confirm(`Periode afronden per ${nieuweStartDatum}? Het Clausement gaat terug naar 0. Het Recordboek blijft staan.`)) return;
@@ -44,14 +45,17 @@ export default function BeheerView({
 
   async function handleStartNewSeason() {
     setSeizoenBezig(true);
+    setSeizoenMsg("");
     const result = await onStartNewSeason(seizoenStartDatum);
     setSeizoenBezig(false);
     if (!result.ok) {
-      setErrorMsg(result.message);
+      setSeizoenMsg(result.message || "Nieuw seizoen starten is niet gelukt.");
       return;
     }
     setSeizoenBevestiging("");
     setShowSeizoen(false);
+    setSeizoenMsg("Nieuw seizoen gestart ✓");
+    setTimeout(() => setSeizoenMsg(""), 5000);
   }
 
   return (
@@ -193,6 +197,11 @@ export default function BeheerView({
       >
         {showSeizoen ? "Nieuw seizoen verbergen" : "Nieuw seizoen starten"}
       </button>
+      {seizoenMsg && (
+        <div className="cy-medium" style={{ fontSize: 12.5, color: seizoenMsg.endsWith("✓") ? "#2e8b57" : "#c0392b", marginTop: 8 }}>
+          {seizoenMsg}
+        </div>
+      )}
       {showSeizoen && (
         <div style={{ marginTop: 10, marginBottom: 20, background: "#fdecea", borderRadius: 6, padding: 12 }}>
           <div className="cy-medium" style={{ fontSize: 12.5, color: "#c0392b", marginBottom: 6 }}>
