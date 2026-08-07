@@ -212,12 +212,6 @@ export default function InvoerView({ players, trainings, myName, goals, personal
           </div>
         </div>
       )}
-      {editingId && bewerkbaarNu && (
-        <Banner tone="light">
-          Er staat al een training op {date} — de bestaande gegevens zijn geladen. Opslaan werkt bij.{" "}
-          <TextButton onClick={requestCancelEdit} style={{ color: "inherit", textDecoration: "underline" }}>annuleren</TextButton>
-        </Banner>
-      )}
       {editingId && !bewerkbaarNu && (
         <Banner tone="yellow">
           Deze training is niet meer op dezelfde dag ingevoerd, dus kan je 'm als speler niet meer wijzigen —
