@@ -71,12 +71,12 @@ begin
     raise exception 'Alleen de trainer kan een nieuw seizoen starten';
   end if;
 
-  delete from cycle_bonuses;
-  delete from personal_records;
-  delete from goal_history;
-  delete from goals;
-  delete from trainings; -- cascadeert naar training_scores
-  delete from periods;
+  delete from cycle_bonuses where true;
+  delete from personal_records where true;
+  delete from goal_history where true;
+  delete from goals where true;
+  delete from trainings where true; -- cascadeert naar training_scores
+  delete from periods where true;
 
   insert into periods (number, start_date, end_date) values (1, p_start_date, null);
 
