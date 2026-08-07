@@ -5,6 +5,8 @@ import { COLORS } from "@/lib/constants";
 import { daysBetween, todayISO } from "@/lib/util";
 import { Banner, Empty, inputStyle } from "./shared";
 
+const SEIZOEN_BEVESTIGING = "NIEUW SEIZOEN";
+
 export default function BeheerView({
   players,
   onAddPlayer,
@@ -13,12 +15,10 @@ export default function BeheerView({
   periodStart,
   onResetPeriode,
   auditLog,
+  onUpdateAuditLog,
+  onDeleteAuditLog,
+  onStartNewSeason,
   onExportBackup,
-  exercises,
-  customExercises,
-  onAddCustomExercise,
-  onUpdateCustomExercise,
-  onDeleteCustomExercise,
   teamGoal,
   onSetTeamGoal,
 }) {
@@ -27,41 +27,51 @@ export default function BeheerView({
   const [showBackup, setShowBackup] = useState(false);
   const [backupMsg, setBackupMsg] = useState("");
   const [teamGoalInput, setTeamGoalInput] = useState(teamGoal ?? "");
-  const [showOefeningen, setShowOefeningen] = useState(false);
-  const [editingExerciseId, setEditingExerciseId] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
-  const baseCategorieen = [...new Set(exercises.filter((e) => !e.isCustom).map((ex) => ex.cat))];
-  const leegOefeningForm = { cat: baseCategorieen[0] || "Eigen accent", station: "Vrij", name: "", metric: "", higherIsBetter: true, desc: "" };
-  const [oefeningForm, setOefeningForm] = useState(leegOefeningForm);
+  const [nieuweStartDatum, setNieuweStartDatum] = useState(todayISO());
   const dagen = daysBetween(periodStart, todayISO());
 
-  function startEditOefening(ex) {
-    setEditingExerciseId(ex.id);
-    setOefeningForm({ cat: ex.cat, station: ex.station, name: ex.name, metric: ex.metric, higherIsBetter: ex.higherIsBetter, desc: ex.desc });
-    setShowOefeningen(true);
+  const [showSeizoen, setShowSeizoen] = useState(false);
+  const [seizoenStartDatum, setSeizoenStartDatum] = useState(todayISO());
+  const [seizoenBevestiging, setSeizoenBevestiging] = useState("");
+  const [seizoenBezig, setSeizoenBezig] = useState(false);
+
+  const [editingLogId, setEditingLogId] = useState(null);
+  const [editingLogName, setEditingLogName] = useState("");
+
+  async function handleResetPeriode() {
+    if (!confirm(`Periode afronden per ${nieuweStartDatum}? Het Clausement gaat terug naar 0. Het Recordboek blijft staan.`)) return;
+    const result = await onResetPeriode(nieuweStartDatum);
+    if (!result.ok) setErrorMsg(result.message);
+    else setNieuweStartDatum(todayISO());
   }
 
-  function cancelOefeningForm() {
-    setEditingExerciseId(null);
-    setOefeningForm(leegOefeningForm);
-  }
-
-  async function saveOefeningForm() {
-    if (!oefeningForm.name.trim() || !oefeningForm.metric.trim()) return;
-    setErrorMsg("");
-    const result = editingExerciseId
-      ? await onUpdateCustomExercise({ ...oefeningForm, id: editingExerciseId })
-      : await onAddCustomExercise(oefeningForm);
+  async function handleStartNewSeason() {
+    setSeizoenBezig(true);
+    const result = await onStartNewSeason(seizoenStartDatum);
+    setSeizoenBezig(false);
     if (!result.ok) {
       setErrorMsg(result.message);
       return;
     }
-    cancelOefeningForm();
+    setSeizoenBevestiging("");
+    setShowSeizoen(false);
   }
 
-  async function handleResetPeriode() {
-    if (!confirm("Periode afronden? Het Clausement gaat terug naar 0. Het Recordboek blijft staan.")) return;
-    const result = await onResetPeriode();
+  function startEditLog(log) {
+    setEditingLogId(log.id);
+    setEditingLogName(log.by || "");
+  }
+
+  async function saveEditLog(log) {
+    const result = await onUpdateAuditLog(log.id, { by: editingLogName });
+    if (!result.ok) setErrorMsg(result.message);
+    setEditingLogId(null);
+  }
+
+  async function handleDeleteLog(id) {
+    if (!confirm("Deze logboekregel verwijderen? Dit kan niet ongedaan gemaakt worden.")) return;
+    const result = await onDeleteAuditLog(id);
     if (!result.ok) setErrorMsg(result.message);
   }
 
@@ -72,6 +82,12 @@ export default function BeheerView({
       <div className="scorepanel" style={{ padding: 14, marginBottom: 18 }}>
         <div className="cy-medium" style={{ fontSize: 13, marginBottom: 4 }}>Periode {periodNumber} — dag {dagen} van ~56</div>
         <div className="cy-regular" style={{ fontSize: 11, color: COLORS.lightBlue, marginBottom: 10 }}>Start: {periodStart}</div>
+        <div style={{ marginBottom: 10 }}>
+          <div className="cy-regular" style={{ fontSize: 11, color: COLORS.lightBlue, marginBottom: 4 }}>
+            Startdatum volgende periode (hoeft niet direct aan te sluiten)
+          </div>
+          <input type="date" value={nieuweStartDatum} onChange={(e) => setNieuweStartDatum(e.target.value)} style={inputStyle} />
+        </div>
         <button
           onClick={handleResetPeriode}
           className="cy-medium"
@@ -114,104 +130,6 @@ export default function BeheerView({
           style={{ ...inputStyle }}
         />
       </div>
-
-      <button
-        onClick={() => setShowOefeningen((v) => !v)}
-        className="cy-medium"
-        style={{ width: "100%", marginBottom: 20, background: "none", border: `1.5px solid ${COLORS.blue}`, color: COLORS.blue, borderRadius: 6, padding: "10px 8px", fontSize: 13, cursor: "pointer" }}
-      >
-        {showOefeningen ? "Eigen oefeningen verbergen" : `Eigen Recordboek-oefeningen (${customExercises.length}) — toevoegen/wijzigen`}
-      </button>
-      {showOefeningen && (
-        <div style={{ marginBottom: 20 }}>
-          <div className="cy-regular" style={{ fontSize: 11, color: "#777", marginBottom: 10, lineHeight: 1.5 }}>
-            De basisoefeningen uit het Handboek staan vast. Hier voeg je eigen extra oefeningen toe —
-            handig voor een individueel accent dat nog niet in de lijst staat. Eigen oefeningen kun je
-            later altijd nog wijzigen of verwijderen.
-          </div>
-
-          <div style={{ background: COLORS.white, borderRadius: 6, padding: 10, marginBottom: 12 }}>
-            <div className="cy-medium" style={{ fontSize: 12, color: COLORS.blue, marginBottom: 8 }}>
-              {editingExerciseId ? "Oefening wijzigen" : "Nieuwe oefening"}
-            </div>
-            <input placeholder="Naam" value={oefeningForm.name} onChange={(e) => setOefeningForm({ ...oefeningForm, name: e.target.value })} style={{ ...inputStyle, marginBottom: 6 }} />
-            <textarea
-              placeholder="Omschrijving — wat moet de speelster precies doen?"
-              value={oefeningForm.desc}
-              onChange={(e) => setOefeningForm({ ...oefeningForm, desc: e.target.value })}
-              style={{ ...inputStyle, height: 60, marginBottom: 6 }}
-            />
-            <input
-              placeholder="Meeteenheid, bv. 'aantal raak van de 10' of 'seconden'"
-              value={oefeningForm.metric}
-              onChange={(e) => setOefeningForm({ ...oefeningForm, metric: e.target.value })}
-              style={{ ...inputStyle, marginBottom: 6 }}
-            />
-            <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
-              <select value={oefeningForm.cat} onChange={(e) => setOefeningForm({ ...oefeningForm, cat: e.target.value })} style={{ ...inputStyle, flex: 1 }}>
-                {baseCategorieen.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-                <option value="Eigen accent">Eigen accent</option>
-              </select>
-              <select value={oefeningForm.station} onChange={(e) => setOefeningForm({ ...oefeningForm, station: e.target.value })} style={{ ...inputStyle, flex: 1 }}>
-                {["Net", "Veld", "Muur", "Mat", "Vrij"].map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-            <label className="cy-regular" style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-              <input type="checkbox" checked={oefeningForm.higherIsBetter} onChange={(e) => setOefeningForm({ ...oefeningForm, higherIsBetter: e.target.checked })} />
-              Hoger is beter (uitzetten bij bv. een tijd waarbij lager beter is)
-            </label>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button
-                onClick={saveOefeningForm}
-                className="cy-medium"
-                style={{ flex: 1, background: COLORS.yellow, color: COLORS.black, border: "none", borderRadius: 6, padding: "10px 8px", fontSize: 12.5, cursor: "pointer" }}
-              >
-                {editingExerciseId ? "Wijziging opslaan" : "Oefening toevoegen"}
-              </button>
-              {editingExerciseId && (
-                <button
-                  onClick={cancelOefeningForm}
-                  className="cy-medium"
-                  style={{ background: "none", border: `1.5px solid ${COLORS.blue}`, color: COLORS.blue, borderRadius: 6, padding: "10px 12px", fontSize: 12.5, cursor: "pointer" }}
-                >
-                  Annuleren
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {customExercises.length === 0 && <div className="cy-regular" style={{ fontSize: 12, color: "#999" }}>Nog geen eigen oefeningen toegevoegd.</div>}
-            {customExercises.map((ex) => (
-              <div key={ex.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: COLORS.white, borderRadius: 6, padding: "8px 10px" }}>
-                <div>
-                  <div className="cy-medium" style={{ fontSize: 13 }}>{ex.name}</div>
-                  <div className="cy-regular" style={{ fontSize: 10.5, color: "#999" }}>{ex.cat} · {ex.station} · {ex.metric}</div>
-                </div>
-                <div style={{ display: "flex", gap: 10 }}>
-                  <span onClick={() => startEditOefening(ex)} className="cy-medium" style={{ fontSize: 12, color: COLORS.blue, cursor: "pointer" }}>wijzigen</span>
-                  <span
-                    onClick={async () => {
-                      if (confirm(`"${ex.name}" verwijderen?`)) {
-                        const result = await onDeleteCustomExercise(ex.id);
-                        if (!result.ok) setErrorMsg(result.message);
-                      }
-                    }}
-                    className="cy-medium"
-                    style={{ fontSize: 12, color: "#c0392b", cursor: "pointer" }}
-                  >
-                    verwijderen
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="cy-medium" style={{ fontSize: 13, color: COLORS.blue, marginBottom: 8 }}>SPEELSTERS ({players.length})</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -290,6 +208,61 @@ export default function BeheerView({
       )}
 
       <button
+        onClick={() => setShowSeizoen((v) => !v)}
+        className="cy-medium"
+        style={{ width: "100%", marginTop: 12, background: "none", border: "1.5px solid #c0392b", color: "#c0392b", borderRadius: 6, padding: "10px 8px", fontSize: 13, cursor: "pointer" }}
+      >
+        {showSeizoen ? "Nieuw seizoen verbergen" : "Nieuw seizoen starten"}
+      </button>
+      {showSeizoen && (
+        <div style={{ marginTop: 10, marginBottom: 20, background: "#fdecea", borderRadius: 6, padding: 12 }}>
+          <div className="cy-medium" style={{ fontSize: 12.5, color: "#c0392b", marginBottom: 6 }}>
+            Let op: dit kan niet ongedaan gemaakt worden
+          </div>
+          <div className="cy-regular" style={{ fontSize: 11.5, color: "#555", marginBottom: 10, lineHeight: 1.5 }}>
+            Dit wist definitief het Recordboek (totalen, persoonlijke records, doel-geschiedenis, huidige
+            doelen) en alle periodes — het Clausement begint weer bij Periode 1. Oude seizoensdata blijft
+            daarna niet meer zichtbaar of vergelijkbaar in de app. Spelers, oefeningen, teamdoel en het
+            logboek blijven wel gewoon staan. Exporteer hierboven eerst een backup als je de oude stand wil
+            bewaren.
+          </div>
+          <div style={{ marginBottom: 10 }}>
+            <div className="cy-regular" style={{ fontSize: 11, color: "#555", marginBottom: 4 }}>Startdatum nieuwe Periode 1</div>
+            <input type="date" value={seizoenStartDatum} onChange={(e) => setSeizoenStartDatum(e.target.value)} style={inputStyle} />
+          </div>
+          <div style={{ marginBottom: 10 }}>
+            <div className="cy-regular" style={{ fontSize: 11, color: "#555", marginBottom: 4 }}>
+              Typ &quot;{SEIZOEN_BEVESTIGING}&quot; om te bevestigen
+            </div>
+            <input
+              value={seizoenBevestiging}
+              onChange={(e) => setSeizoenBevestiging(e.target.value)}
+              placeholder={SEIZOEN_BEVESTIGING}
+              style={inputStyle}
+            />
+          </div>
+          <button
+            onClick={handleStartNewSeason}
+            disabled={seizoenBezig || seizoenBevestiging.trim().toUpperCase() !== SEIZOEN_BEVESTIGING}
+            className="cy-medium"
+            style={{
+              width: "100%",
+              background: "#c0392b",
+              color: COLORS.white,
+              border: "none",
+              borderRadius: 6,
+              padding: "10px 8px",
+              fontSize: 13,
+              cursor: seizoenBevestiging.trim().toUpperCase() === SEIZOEN_BEVESTIGING ? "pointer" : "not-allowed",
+              opacity: seizoenBevestiging.trim().toUpperCase() === SEIZOEN_BEVESTIGING ? 1 : 0.5,
+            }}
+          >
+            {seizoenBezig ? "BEZIG…" : "NIEUW SEIZOEN STARTEN"}
+          </button>
+        </div>
+      )}
+
+      <button
         onClick={() => setShowLog((v) => !v)}
         className="cy-medium"
         style={{ width: "100%", marginTop: 12, background: "none", border: `1.5px solid ${COLORS.blue}`, color: COLORS.blue, borderRadius: 6, padding: "10px 8px", fontSize: 13, cursor: "pointer" }}
@@ -301,10 +274,33 @@ export default function BeheerView({
           {auditLog.length === 0 && <Empty text="Nog geen wijzigingen gelogd." />}
           {[...auditLog].reverse().map((log) => (
             <div key={log.id} style={{ background: COLORS.white, borderRadius: 4, padding: "8px 10px" }}>
-              <div className="cy-regular" style={{ fontSize: 11.5, color: "#555" }}>
-                <span className="cy-medium">{log.by || "onbekend"}</span> heeft training van {log.trainingDate} {log.action}
-                <span style={{ color: "#aaa" }}> · {new Date(log.at).toLocaleString("nl-NL")}</span>
-              </div>
+              {editingLogId === log.id ? (
+                <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
+                  <input
+                    value={editingLogName}
+                    onChange={(e) => setEditingLogName(e.target.value)}
+                    style={{ ...inputStyle, padding: "6px 8px", fontSize: 12 }}
+                  />
+                  <span onClick={() => saveEditLog(log)} className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, cursor: "pointer", flexShrink: 0 }}>opslaan</span>
+                  <span onClick={() => setEditingLogId(null)} className="cy-medium" style={{ fontSize: 11.5, color: "#999", cursor: "pointer", flexShrink: 0 }}>annuleren</span>
+                </div>
+              ) : (
+                <div className="cy-regular" style={{ fontSize: 11.5, color: "#555", display: "flex", justifyContent: "space-between", gap: 8 }}>
+                  <span>
+                    <span className="cy-medium">{log.by || "onbekend"}</span>{" "}
+                    {log.action === "seizoen gestart" ? (
+                      <>heeft een nieuw seizoen gestart (vanaf {log.trainingDate})</>
+                    ) : (
+                      <>heeft training van {log.trainingDate} {log.action}</>
+                    )}
+                    <span style={{ color: "#aaa" }}> · {new Date(log.at).toLocaleString("nl-NL")}</span>
+                  </span>
+                  <span style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                    <span onClick={() => startEditLog(log)} className="cy-medium" style={{ fontSize: 11, color: COLORS.blue, cursor: "pointer" }}>wijzigen</span>
+                    <span onClick={() => handleDeleteLog(log.id)} className="cy-medium" style={{ fontSize: 11, color: "#c0392b", cursor: "pointer" }}>verwijderen</span>
+                  </span>
+                </div>
+              )}
               {log.action === "gewijzigd" && log.previousSummary && (
                 <div className="cy-regular" style={{ fontSize: 10.5, color: "#999", marginTop: 4 }}>
                   <div className="cy-medium" style={{ color: "#aaa" }}>was:</div>
@@ -314,7 +310,7 @@ export default function BeheerView({
                   ))}
                 </div>
               )}
-              {log.summary && (
+              {log.summary && log.action !== "seizoen gestart" && (
                 <div className="cy-regular" style={{ fontSize: 10.5, color: "#555", marginTop: 4 }}>
                   {log.action === "gewijzigd" && <div className="cy-medium" style={{ color: COLORS.blue }}>nu:</div>}
                   {log.summary.length === 0 && <div>— geen punten —</div>}

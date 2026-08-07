@@ -154,6 +154,10 @@ function AppShell({ view, setView }) {
             personalRecords={data.personalRecords}
             cycleBonuses={data.cycleBonuses}
             exercises={data.exercises}
+            customExercises={data.customExercises}
+            onAddCustomExercise={data.addCustomExercise}
+            onUpdateCustomExercise={data.updateCustomExercise}
+            onDeleteCustomExercise={data.deleteCustomExercise}
             isTrainer={isTrainer}
           />
         )}
@@ -181,12 +185,10 @@ function AppShell({ view, setView }) {
             periodStart={data.periodStart}
             onResetPeriode={data.resetPeriode}
             auditLog={data.auditLog}
+            onUpdateAuditLog={data.updateAuditLogEntry}
+            onDeleteAuditLog={data.deleteAuditLogEntry}
+            onStartNewSeason={data.startNewSeason}
             onExportBackup={data.buildBackupString}
-            exercises={data.exercises}
-            customExercises={data.customExercises}
-            onAddCustomExercise={data.addCustomExercise}
-            onUpdateCustomExercise={data.updateCustomExercise}
-            onDeleteCustomExercise={data.deleteCustomExercise}
             teamGoal={data.teamGoal}
             onSetTeamGoal={data.setTeamGoal}
           />
