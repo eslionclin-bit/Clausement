@@ -30,7 +30,7 @@ function PuntenUitleg() {
               <div className="cy-regular" style={{ fontSize: 12, color: "#555", lineHeight: 1.4 }}>{v}</div>
             </div>
           ))}
-          <div className="cy-regular" style={{ fontSize: 11, color: "#999", lineHeight: 1.4 }}>
+          <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", lineHeight: 1.4 }}>
             Je totaal is de som van deze drie. Elke periode (~8 weken) begint dit weer op 0 — het
             Recordboek (los tabblad) telt wél het hele seizoen door.
           </div>
@@ -78,7 +78,7 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises }
     <div style={{ background: "#f7f7fb", borderRadius: "0 0 8px 8px", padding: "10px 12px", marginBottom: 4 }}>
       <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginBottom: 4 }}>OPENINGSSPEL</div>
       {openingsspelRegels.length === 0 && (
-        <div className="cy-regular" style={{ fontSize: 11, color: "#999", marginBottom: 8 }}>Nog geen scores.</div>
+        <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 8 }}>Nog geen scores.</div>
       )}
       {openingsspelRegels.map((t) => (
         <div key={t.id} className="cy-regular" style={{ fontSize: 11, color: "#555" }}>
@@ -88,7 +88,7 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises }
 
       <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginTop: 10, marginBottom: 4 }}>DOEL</div>
       {doelGeschiedenis.length === 0 && (
-        <div className="cy-regular" style={{ fontSize: 11, color: "#999", marginBottom: 8 }}>Nog geen doel gekozen.</div>
+        <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 8 }}>Nog geen doel gekozen.</div>
       )}
       {[...doelGeschiedenis].reverse().map((h, i) => (
         <div key={i} className="cy-regular" style={{ fontSize: 11, color: "#555" }}>
@@ -99,7 +99,7 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises }
 
       <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginTop: 10, marginBottom: 4 }}>WEDSTRIJD</div>
       {wedstrijdRegels.length === 0 && (
-        <div className="cy-regular" style={{ fontSize: 11, color: "#999" }}>Nog geen wedstrijden.</div>
+        <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b" }}>Nog geen wedstrijden.</div>
       )}
       {wedstrijdRegels.map((t) => (
         <div key={t.id} className="cy-regular" style={{ fontSize: 11, color: "#555" }}>
@@ -178,7 +178,7 @@ export default function StandenView({ players, trainings, periodStart, periodNum
                       </span>
                     )}
                   </div>
-                  <div className="cy-regular" style={{ fontSize: 11, color: "#777" }}>
+                  <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b" }}>
                     wedstrijd {r.wedstrijd} · openingsspel {r.openingsspel} · doel {r.doel}
                   </div>
                 </div>

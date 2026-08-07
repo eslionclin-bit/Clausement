@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { COLORS } from "@/lib/constants";
 import { daysBetween, todayISO } from "@/lib/util";
-import { Banner, Empty, inputStyle } from "./shared";
+import { Banner, Empty, TextButton, inputStyle } from "./shared";
 
 const SEIZOEN_BEVESTIGING = "NIEUW SEIZOEN";
 
@@ -142,7 +142,7 @@ export default function BeheerView({
       </button>
       {showBackup && (
         <div style={{ marginTop: 10 }}>
-          <div className="cy-regular" style={{ fontSize: 11, color: "#777", marginBottom: 8, lineHeight: 1.5 }}>
+          <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 8, lineHeight: 1.5 }}>
             Handig als eigen archief naast de automatische Supabase-databasebackups. Bewaar dit JSON-bestand
             ergens veilig. Data terugzetten uit een oude artifact-backup kan via het migratiescript in de
             repository (zie README) — dat is bewust geen knop in de app, om te voorkomen dat live data per
@@ -270,21 +270,20 @@ export default function BeheerView({
                   ) : (
                     <>heeft training van {log.trainingDate} {log.action}</>
                   )}
-                  <span style={{ color: "#aaa" }}> · {new Date(log.at).toLocaleString("nl-NL")}</span>
+                  <span style={{ color: "#6b6b6b" }}> · {new Date(log.at).toLocaleString("nl-NL")}</span>
                 </span>
                 {log.action !== "seizoen gestart" && (
-                  <span
+                  <TextButton
                     onClick={() => onEditTraining(log.trainingDate)}
-                    className="cy-medium"
-                    style={{ fontSize: 11, color: COLORS.blue, cursor: "pointer", flexShrink: 0 }}
+                    style={{ fontSize: 11, color: COLORS.blue, flexShrink: 0 }}
                   >
                     bewerk scores
-                  </span>
+                  </TextButton>
                 )}
               </div>
               {log.action === "gewijzigd" && log.previousSummary && (
-                <div className="cy-regular" style={{ fontSize: 10.5, color: "#999", marginTop: 4 }}>
-                  <div className="cy-medium" style={{ color: "#aaa" }}>was:</div>
+                <div className="cy-regular" style={{ fontSize: 10.5, color: "#6b6b6b", marginTop: 4 }}>
+                  <div className="cy-medium" style={{ color: "#6b6b6b" }}>was:</div>
                   {log.previousSummary.length === 0 && <div>— geen punten —</div>}
                   {log.previousSummary.map((s) => (
                     <div key={s.name}>{s.name}: open. {s.openingsspel} · doel {s.doel} · wedstrijd {s.wedstrijd || "-"}</div>

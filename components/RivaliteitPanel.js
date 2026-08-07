@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { COLORS } from "@/lib/constants";
-import { Empty } from "./shared";
+import { Empty, TextButton } from "./shared";
 
 function scoreLabel(personalRecords, playerId, exerciseId) {
   const v = personalRecords[`${playerId}:${exerciseId}`];
@@ -92,7 +92,7 @@ export default function RivaliteitPanel({ mijnSpeler, mijnDoel, players, goals, 
 
       {open && (
         <div style={{ marginTop: 10 }}>
-          <div className="cy-regular" style={{ fontSize: 11, color: "#777", marginBottom: 10, lineHeight: 1.5 }}>
+          <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 10, lineHeight: 1.5 }}>
             Daag een speelster met hetzelfde doel uit. Jullie voortgang is alleen voor jullie tweeën zichtbaar,
             zolang je geen van beiden een nieuw doel kiest — dan vervalt de rivaliteit automatisch.
           </div>
@@ -113,13 +113,13 @@ export default function RivaliteitPanel({ mijnSpeler, mijnDoel, players, goals, 
                     haarNaam={naam(tegenstander(r))}
                     haarScore={scoreLabel(personalRecords, tegenstander(r), r.exerciseId)}
                   />
-                  <span
+                  <TextButton
                     onClick={() => actie(r.id, onEndRivalry, r.id, mijnSpeler.id)}
-                    className="cy-medium"
-                    style={{ fontSize: 11.5, color: "#c0392b", cursor: "pointer", opacity: busyId === r.id ? 0.5 : 1 }}
+                    disabled={busyId === r.id}
+                    style={{ fontSize: 11.5, color: "#c0392b", opacity: busyId === r.id ? 0.5 : 1 }}
                   >
                     beëindig rivaliteit
-                  </span>
+                  </TextButton>
                 </Kaart>
               ))}
             </div>
@@ -138,20 +138,20 @@ export default function RivaliteitPanel({ mijnSpeler, mijnDoel, players, goals, 
                     haarScore={scoreLabel(personalRecords, tegenstander(r), r.exerciseId)}
                   />
                   <div style={{ display: "flex", gap: 12 }}>
-                    <span
+                    <TextButton
                       onClick={() => actie(r.id, onRespondRivalry, r.id, mijnSpeler.id, true)}
-                      className="cy-medium"
-                      style={{ fontSize: 12, color: "#2e8b57", cursor: "pointer", opacity: busyId === r.id ? 0.5 : 1 }}
+                      disabled={busyId === r.id}
+                      style={{ fontSize: 12, color: "#2e8b57", opacity: busyId === r.id ? 0.5 : 1 }}
                     >
                       accepteren
-                    </span>
-                    <span
+                    </TextButton>
+                    <TextButton
                       onClick={() => actie(r.id, onRespondRivalry, r.id, mijnSpeler.id, false)}
-                      className="cy-medium"
-                      style={{ fontSize: 12, color: "#c0392b", cursor: "pointer", opacity: busyId === r.id ? 0.5 : 1 }}
+                      disabled={busyId === r.id}
+                      style={{ fontSize: 12, color: "#c0392b", opacity: busyId === r.id ? 0.5 : 1 }}
                     >
                       afwijzen
-                    </span>
+                    </TextButton>
                   </div>
                 </Kaart>
               ))}
@@ -164,13 +164,13 @@ export default function RivaliteitPanel({ mijnSpeler, mijnDoel, players, goals, 
               {uitgaand.map((r) => (
                 <Kaart key={r.id}>
                   <div className="cy-medium" style={{ fontSize: 13 }}>Uitgenodigd: {naam(tegenstander(r))} — {mijnDoel.exerciseName}</div>
-                  <span
+                  <TextButton
                     onClick={() => actie(r.id, onEndRivalry, r.id, mijnSpeler.id)}
-                    className="cy-medium"
-                    style={{ fontSize: 11.5, color: "#c0392b", cursor: "pointer", opacity: busyId === r.id ? 0.5 : 1 }}
+                    disabled={busyId === r.id}
+                    style={{ fontSize: 11.5, color: "#c0392b", opacity: busyId === r.id ? 0.5 : 1 }}
                   >
                     intrekken
-                  </span>
+                  </TextButton>
                 </Kaart>
               ))}
             </div>
@@ -187,13 +187,13 @@ export default function RivaliteitPanel({ mijnSpeler, mijnDoel, players, goals, 
                 haarNaam={p.name}
                 haarScore={scoreLabel(personalRecords, p.id, mijnDoel.exerciseId)}
               />
-              <span
+              <TextButton
                 onClick={() => actie(p.id, onProposeRivalry, mijnSpeler.id, p.id)}
-                className="cy-medium"
-                style={{ fontSize: 12, color: COLORS.blue, cursor: "pointer", opacity: busyId === p.id ? 0.5 : 1 }}
+                disabled={busyId === p.id}
+                style={{ fontSize: 12, color: COLORS.blue, opacity: busyId === p.id ? 0.5 : 1 }}
               >
                 daag uit
-              </span>
+              </TextButton>
             </Kaart>
           ))}
         </div>

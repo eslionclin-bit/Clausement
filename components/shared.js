@@ -65,6 +65,32 @@ export function Banner({ tone = "yellow", children }) {
   );
 }
 
+// Voor tekst-acties ("wijzigen", "verwijderen", "accepteren", ...) die er als
+// link uitzien maar wél een echte, met toetsenbord bereikbare knop moeten
+// zijn — vervangt de eerdere <span onClick> die Tab volledig oversloeg.
+export function TextButton({ onClick, disabled, className = "cy-medium", style, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={className}
+      style={{
+        background: "none",
+        border: "none",
+        padding: 0,
+        margin: 0,
+        font: "inherit",
+        textAlign: "inherit",
+        cursor: disabled ? "default" : "pointer",
+        ...style,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function TabButton({ active, onClick, badge, children }) {
   return (
     <button
@@ -140,7 +166,7 @@ export function Empty({ text }) {
   return (
     <div
       className="cy-regular"
-      style={{ textAlign: "center", color: "#888", fontSize: 13, padding: "30px 10px", background: "#fff", borderRadius: 6 }}
+      style={{ textAlign: "center", color: "#6b6b6b", fontSize: 13, padding: "30px 10px", background: "#fff", borderRadius: 6 }}
     >
       {text}
     </div>
@@ -162,7 +188,7 @@ export function MiniNum({ label, value, onChange, max, warnAbove }) {
   const teHoog = warnAbove && Number(value) > warnAbove;
   return (
     <div style={{ flex: 1 }}>
-      <div className="cy-regular" style={{ fontSize: 10, color: "#999", marginBottom: 2 }}>
+      <div className="cy-regular" style={{ fontSize: 10, color: "#6b6b6b", marginBottom: 2 }}>
         {label}
       </div>
       <input

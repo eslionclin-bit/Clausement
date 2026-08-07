@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { COLORS } from "@/lib/constants";
 import { previewDoelPunten } from "@/lib/logic";
 import { todayISO } from "@/lib/util";
-import { Banner, Empty, Field, MiniNum, inputStyle } from "./shared";
+import { Banner, Empty, Field, MiniNum, TextButton, inputStyle } from "./shared";
 
 export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving, isTrainer, jumpToDate, onDirtyChange }) {
   const emptyRows = () => Object.fromEntries(players.map((p) => [p.id, { openingsspel: 0, doel: 0, doelRaw: "", wedstrijd: "" }]));
@@ -215,14 +215,14 @@ export default function InvoerView({ players, trainings, myName, goals, personal
       {editingId && bewerkbaarNu && (
         <Banner tone="light">
           Er staat al een training op {date} — de bestaande gegevens zijn geladen. Opslaan werkt bij.{" "}
-          <span onClick={requestCancelEdit} style={{ textDecoration: "underline", cursor: "pointer" }}>annuleren</span>
+          <TextButton onClick={requestCancelEdit} style={{ color: "inherit", textDecoration: "underline" }}>annuleren</TextButton>
         </Banner>
       )}
       {editingId && !bewerkbaarNu && (
         <Banner tone="yellow">
           Deze training is niet meer op dezelfde dag ingevoerd, dus kan je 'm als speler niet meer wijzigen —
           vraag de trainer. Je ziet de ingevoerde waarden hieronder wel ter controle.{" "}
-          <span onClick={requestCancelEdit} style={{ textDecoration: "underline", cursor: "pointer" }}>sluiten</span>
+          <TextButton onClick={requestCancelEdit} style={{ color: "inherit", textDecoration: "underline" }}>sluiten</TextButton>
         </Banner>
       )}
       {errorMsg && <Banner tone="yellow">{errorMsg}</Banner>}
@@ -232,7 +232,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
       </Field>
 
       <div className="cy-medium" style={{ fontSize: 13, color: COLORS.blue, margin: "18px 0 8px" }}>PUNTEN PER SPEELSTER</div>
-      <div className="cy-regular" style={{ fontSize: 11, color: "#777", marginBottom: 10, lineHeight: 1.5 }}>
+      <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 10, lineHeight: 1.5 }}>
         Openingsspel: plaatsingspunten. Doel:
         vul de score van vandaag in bij het gekozen doel — de app bepaalt zelf of het een record is
         (1 punt voor poging, +1 extra bij een verbeterd record). Wedstrijd: heeft ze het partijtje
@@ -267,7 +267,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
                   <div>
                     <div className="cy-medium" style={{ fontSize: 13.5 }}>{p.name}</div>
                     {!open && (
-                      <div className="cy-regular" style={{ fontSize: 11, color: "#888", marginTop: 2 }}>
+                      <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginTop: 2 }}>
                         {summarizeRow(rows[p.id], ex)}
                       </div>
                     )}
@@ -280,7 +280,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
                     <div style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "flex-end" }}>
                       <MiniNum label="Openingsspel" value={rows[p.id]?.openingsspel ?? 0} onChange={(v) => updateRow(p.id, "openingsspel", v)} warnAbove={15} />
                       <div style={{ flex: 2 }}>
-                        <div className="cy-regular" style={{ fontSize: 10, color: "#999", marginBottom: 2 }}>
+                        <div className="cy-regular" style={{ fontSize: 10, color: "#6b6b6b", marginBottom: 2 }}>
                           {ex ? `Score — ${ex.metric}` : "Doel (geen doel gekozen)"}
                           {ex && personalRecords[`${p.id}:${ex.id}`] !== undefined && (
                             <span style={{ color: COLORS.blue }}> · vorige: {personalRecords[`${p.id}:${ex.id}`]}</span>
@@ -297,7 +297,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
                         />
                       </div>
                     </div>
-                    {ex && <div className="cy-regular" style={{ fontSize: 10, color: "#aaa", marginBottom: 6 }}>Doel: {ex.name}</div>}
+                    {ex && <div className="cy-regular" style={{ fontSize: 10, color: "#6b6b6b", marginBottom: 6 }}>Doel: {ex.name}</div>}
                     {ex && rows[p.id]?.doelRaw !== "" && rows[p.id]?.doelRaw !== undefined && (
                       <div className="cy-medium" style={{ fontSize: 11, marginBottom: 6, color: previewDoelPunten(p.id, ex, rows[p.id].doelRaw, personalRecords, goals, cycleBonuses).punten > 1 ? "#2e8b57" : COLORS.blue }}>
                         {previewDoelPunten(p.id, ex, rows[p.id].doelRaw, personalRecords, goals, cycleBonuses).tekst}
@@ -372,18 +372,18 @@ export default function InvoerView({ players, trainings, myName, goals, personal
                         <div key={t.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: COLORS.white, borderRadius: 6, padding: "8px 10px" }}>
                           <div>
                             <div className="cy-medium" style={{ fontSize: 13 }}>{t.date}</div>
-                            <div className="cy-regular" style={{ fontSize: 10.5, color: "#888" }}>{Object.keys(t.spelers || {}).length} speelsters</div>
-                            <div className="cy-regular" style={{ fontSize: 10, color: "#aaa" }}>
+                            <div className="cy-regular" style={{ fontSize: 10.5, color: "#6b6b6b" }}>{Object.keys(t.spelers || {}).length} speelsters</div>
+                            <div className="cy-regular" style={{ fontSize: 10, color: "#6b6b6b" }}>
                               ingevoerd door {t.enteredBy || "onbekend"}{t.updatedBy ? ` · gewijzigd door ${t.updatedBy}` : ""}
                             </div>
                           </div>
                           {bewerkbaar ? (
                             <div style={{ display: "flex", gap: 10 }}>
-                              <span onClick={() => startEdit(t)} className="cy-medium" style={{ fontSize: 12, color: COLORS.blue, cursor: "pointer" }}>wijzigen</span>
-                              <span onClick={() => handleDelete(t.id)} className="cy-medium" style={{ fontSize: 12, color: "#c0392b", cursor: "pointer" }}>verwijderen</span>
+                              <TextButton onClick={() => startEdit(t)} style={{ fontSize: 12, color: COLORS.blue }}>wijzigen</TextButton>
+                              <TextButton onClick={() => handleDelete(t.id)} style={{ fontSize: 12, color: "#c0392b" }}>verwijderen</TextButton>
                             </div>
                           ) : (
-                            <span className="cy-regular" style={{ fontSize: 11, color: "#aaa" }}>alleen trainer</span>
+                            <span className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b" }}>alleen trainer</span>
                           )}
                         </div>
                       );

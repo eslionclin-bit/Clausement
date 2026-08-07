@@ -138,28 +138,30 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
   return (
     <div style={{ minHeight: "100vh", background: COLORS.paper }}>
       <div className="header-gradient" style={{ padding: "16px 16px 0" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ background: COLORS.white, borderRadius: 6, padding: "4px 8px", display: "flex", alignItems: "center" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={LOGO_SRC} alt="VCH" style={{ height: 22, width: "auto", display: "block" }} />
+        <div style={{ maxWidth: 480, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ background: COLORS.white, borderRadius: 6, padding: "4px 8px", display: "flex", alignItems: "center" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={LOGO_SRC} alt="VCH" style={{ height: 22, width: "auto", display: "block" }} />
+              </div>
+              <span className="cy-black" style={{ color: COLORS.white, fontSize: 18, letterSpacing: 0.3 }}>HET CLAUSEMENT</span>
             </div>
-            <span className="cy-black" style={{ color: COLORS.white, fontSize: 18, letterSpacing: 0.3 }}>HET CLAUSEMENT</span>
+            <button
+              onClick={handleSignOut}
+              className="cy-regular"
+              style={{ background: "none", border: "none", color: COLORS.lightBlue, fontSize: 11, cursor: "pointer" }}
+            >
+              {myName}{isTrainer ? " · trainer" : ""} · wissel
+            </button>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="cy-regular"
-            style={{ background: "none", border: "none", color: COLORS.lightBlue, fontSize: 11, cursor: "pointer" }}
-          >
-            {myName}{isTrainer ? " · trainer" : ""} · wissel
-          </button>
-        </div>
-        <div style={{ display: "flex" }}>
-          {tabs.map((t) => (
-            <TabButton key={t.key} active={activeView === t.key} onClick={() => switchView(t.key)} badge={t.badge}>
-              {t.label}
-            </TabButton>
-          ))}
+          <div style={{ display: "flex" }}>
+            {tabs.map((t) => (
+              <TabButton key={t.key} active={activeView === t.key} onClick={() => switchView(t.key)} badge={t.badge}>
+                {t.label}
+              </TabButton>
+            ))}
+          </div>
         </div>
       </div>
 

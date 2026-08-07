@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { COLORS } from "@/lib/constants";
 import { doelGeschiedenisVoorSpeler, doelPerPeriode } from "@/lib/logic";
 import { addDays, todayISO } from "@/lib/util";
-import { Banner, Empty, RankBadge, inputStyle } from "./shared";
+import { Banner, Empty, RankBadge, TextButton, inputStyle } from "./shared";
 import RivaliteitPanel from "./RivaliteitPanel";
 
 function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise, onUpdateCustomExercise, onDeleteCustomExercise }) {
@@ -51,7 +51,7 @@ function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise
       </button>
       {showOefeningen && (
         <div style={{ marginTop: 10 }}>
-          <div className="cy-regular" style={{ fontSize: 11, color: "#777", marginBottom: 10, lineHeight: 1.5 }}>
+          <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 10, lineHeight: 1.5 }}>
             De basisoefeningen uit het Handboek staan vast. Hier voeg je eigen extra oefeningen toe —
             handig voor een individueel accent dat nog niet in de lijst staat. Eigen oefeningen kun je
             later altijd nog wijzigen of verwijderen — door wie dan ook in het team.
@@ -112,27 +112,26 @@ function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {customExercises.length === 0 && <div className="cy-regular" style={{ fontSize: 12, color: "#999" }}>Nog geen eigen oefeningen toegevoegd.</div>}
+            {customExercises.length === 0 && <div className="cy-regular" style={{ fontSize: 12, color: "#6b6b6b" }}>Nog geen eigen oefeningen toegevoegd.</div>}
             {customExercises.map((ex) => (
               <div key={ex.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: COLORS.white, borderRadius: 6, padding: "8px 10px" }}>
                 <div>
                   <div className="cy-medium" style={{ fontSize: 13 }}>{ex.name}</div>
-                  <div className="cy-regular" style={{ fontSize: 10.5, color: "#999" }}>{ex.cat} · {ex.station} · {ex.metric}</div>
+                  <div className="cy-regular" style={{ fontSize: 10.5, color: "#6b6b6b" }}>{ex.cat} · {ex.station} · {ex.metric}</div>
                 </div>
                 <div style={{ display: "flex", gap: 10 }}>
-                  <span onClick={() => startEditOefening(ex)} className="cy-medium" style={{ fontSize: 12, color: COLORS.blue, cursor: "pointer" }}>wijzigen</span>
-                  <span
+                  <TextButton onClick={() => startEditOefening(ex)} style={{ fontSize: 12, color: COLORS.blue }}>wijzigen</TextButton>
+                  <TextButton
                     onClick={async () => {
                       if (confirm(`"${ex.name}" verwijderen?`)) {
                         const result = await onDeleteCustomExercise(ex.id);
                         if (!result.ok) setErrorMsg(result.message);
                       }
                     }}
-                    className="cy-medium"
-                    style={{ fontSize: 12, color: "#c0392b", cursor: "pointer" }}
+                    style={{ fontSize: 12, color: "#c0392b" }}
                   >
                     verwijderen
-                  </span>
+                  </TextButton>
                 </div>
               </div>
             ))}
@@ -187,7 +186,7 @@ function PerOefeningRanglijst({ players, exercises, personalRecords }) {
           </select>
 
           {ex && (
-            <div className="cy-regular" style={{ fontSize: 11, color: "#777", marginBottom: 10 }}>
+            <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 10 }}>
               Gerangschikt op: {ex.metric}
             </div>
           )}
@@ -205,8 +204,8 @@ function PerOefeningRanglijst({ players, exercises, personalRecords }) {
 
           {zonderScore.length > 0 && (
             <div style={{ marginTop: 10 }}>
-              <div className="cy-medium" style={{ fontSize: 11, color: "#999", marginBottom: 4 }}>NOG NIET GEPROBEERD</div>
-              <div className="cy-regular" style={{ fontSize: 11.5, color: "#999" }}>{zonderScore.map((p) => p.name).join(", ")}</div>
+              <div className="cy-medium" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 4 }}>NOG NIET GEPROBEERD</div>
+              <div className="cy-regular" style={{ fontSize: 11.5, color: "#6b6b6b" }}>{zonderScore.map((p) => p.name).join(", ")}</div>
             </div>
           )}
         </div>
@@ -337,7 +336,7 @@ export default function RecordboekView({
             </div>
           )}
           {mijnDoelExercise && (
-            <div className="cy-medium" style={{ fontSize: 11.5, color: aantalGeoefend >= 4 ? "#ff8a8a" : "#aaa", marginBottom: 10 }}>
+            <div className="cy-medium" style={{ fontSize: 11.5, color: aantalGeoefend >= 4 ? "#ff8a8a" : "#6b6b6b", marginBottom: 10 }}>
               {aantalGeoefend}x geoefend{aantalGeoefend >= 4 ? " — tijd voor een nieuw doel!" : ""}
             </div>
           )}
@@ -431,7 +430,7 @@ export default function RecordboekView({
                   <span className="cy-medium" style={{ fontSize: 13 }}>{h.assignment.exerciseName}</span>
                   {h.actief && <span className="cy-medium" style={{ fontSize: 9.5, color: COLORS.blue }}>huidig</span>}
                 </div>
-                <div className="cy-regular" style={{ fontSize: 10.5, color: "#888" }}>
+                <div className="cy-regular" style={{ fontSize: 10.5, color: "#6b6b6b" }}>
                   vanaf {h.assignment.chosenAt}{h.eindDatum ? ` t/m ${h.eindDatum}` : " · nog bezig"}
                 </div>
                 <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginTop: 2 }}>
@@ -464,7 +463,7 @@ export default function RecordboekView({
                     <span className="cy-black" style={{ fontSize: 9.5, color: COLORS.black, background: COLORS.yellow, padding: "2px 6px", borderRadius: 10 }}>STRIKE!</span>
                   )}
                 </div>
-                {doel && <div className="cy-regular" style={{ fontSize: 10.5, color: "#999" }}>doel: {doel.exerciseName}</div>}
+                {doel && <div className="cy-regular" style={{ fontSize: 10.5, color: "#6b6b6b" }}>doel: {doel.exerciseName}</div>}
               </div>
               <div className="tile-num" style={{ fontSize: 20, color: COLORS.lightBlue }}>{r.totaal}</div>
             </div>

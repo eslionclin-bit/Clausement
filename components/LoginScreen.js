@@ -106,7 +106,7 @@ export default function LoginScreen({ players }) {
             >
               Trainer inloggen
             </button>
-            <div className="cy-regular" style={{ fontSize: 11, color: "#888", textAlign: "center", marginTop: 14, lineHeight: 1.5 }}>
+            <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", textAlign: "center", marginTop: 14, lineHeight: 1.5 }}>
               Kies gewoon je eigen naam om scores in te vullen — alleen de trainerslogin is een echt account.
             </div>
           </>
