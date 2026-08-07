@@ -24,8 +24,7 @@ export function AuthProvider({ children }) {
       if (!active) return;
       setSession(data.session || null);
       if (data.session) {
-        setMyName(localStorage.getItem(NAME_KEY));
-        await refreshTrainerStatus();
+        await syncNameForSession(data.session);
       }
       setLoading(false);
     }
@@ -34,8 +33,7 @@ export function AuthProvider({ children }) {
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       setSession(newSession);
       if (newSession) {
-        setMyName(localStorage.getItem(NAME_KEY));
-        await refreshTrainerStatus();
+        await syncNameForSession(newSession);
       } else {
         setIsTrainer(false);
         setMyName(null);
@@ -49,12 +47,29 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function refreshTrainerStatus() {
+  // Bepaalt in één keer of dit een trainer- of spelerssessie is, en welke
+  // naam bij het logboek hoort. Trainers hebben geen speler-rij nodig (zie
+  // briefing-vervolg) — die krijgen automatisch hun e-mailadres als naam,
+  // zodat ze de losse naamkeuze-stap nooit te zien krijgen. Anonieme
+  // spelerssessies hebben geen e-mail, dus worden hier nooit als trainer
+  // herkend.
+  async function syncNameForSession(session) {
+    let trainer = false;
     try {
       const { data, error } = await supabase.rpc("am_i_trainer");
-      if (!error) setIsTrainer(Boolean(data));
+      trainer = !error && Boolean(data);
     } catch {
-      setIsTrainer(false);
+      trainer = false;
+    }
+    setIsTrainer(trainer);
+    const stored = localStorage.getItem(NAME_KEY);
+    if (stored) {
+      setMyName(stored);
+    } else if (trainer && session.user?.email) {
+      localStorage.setItem(NAME_KEY, session.user.email);
+      setMyName(session.user.email);
+    } else {
+      setMyName(null);
     }
   }
 

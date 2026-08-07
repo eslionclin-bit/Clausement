@@ -17,6 +17,10 @@ export default function Page() {
   const auth = useAuth();
   const [view, setView] = useState("standen");
 
+  useEffect(() => {
+    if (auth.isTrainer) setView("beheer");
+  }, [auth.isTrainer]);
+
   if (!supabaseConfigured) {
     return (
       <Screen>

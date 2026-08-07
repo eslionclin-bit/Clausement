@@ -102,6 +102,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
   }
 
   function handleDateChange(nieuweDatum) {
+    if (nieuweDatum > todayISO()) return;
     setDate(nieuweDatum);
     const bestaande = trainings.find((t) => t.date === nieuweDatum);
     if (bestaande) {
@@ -170,7 +171,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
       {errorMsg && <Banner tone="yellow">{errorMsg}</Banner>}
 
       <Field label="Datum">
-        <input type="date" value={date} onChange={(e) => handleDateChange(e.target.value)} style={inputStyle} />
+        <input type="date" value={date} max={todayISO()} onChange={(e) => handleDateChange(e.target.value)} style={inputStyle} />
       </Field>
 
       <div className="cy-medium" style={{ fontSize: 13, color: COLORS.blue, margin: "18px 0 8px" }}>PUNTEN PER SPEELSTER</div>

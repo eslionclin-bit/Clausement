@@ -6,43 +6,12 @@ import { inputStyle } from "./shared";
 import { useAuth } from "@/context/AuthContext";
 
 export default function LoginScreen({ players }) {
-  const { hasSession, isTrainer, pickPlayerName, setDisplayNameOnly, trainerLogin } = useAuth();
+  const { pickPlayerName, trainerLogin } = useAuth();
   const [trainerMode, setTrainerMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-
-  // Trainer is al ingelogd (echte, serverside geverifieerde sessie) maar heeft
-  // nog geen weergavenaam gekozen voor het logboek/invoerscherm.
-  if (hasSession && isTrainer) {
-    return (
-      <div className="header-gradient" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-        <Header subtitle="Ingelogd als trainer — kies je naam in het team" />
-        <div style={{ flex: 1, background: COLORS.paper, borderRadius: "24px 24px 0 0", padding: 20, overflowY: "auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            {players.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setDisplayNameOnly(p.name)}
-                className="cy-medium"
-                style={playerButtonStyle}
-              >
-                {p.name}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setDisplayNameOnly(email || "Trainer")}
-            className="cy-medium"
-            style={{ width: "100%", marginTop: 16, background: "none", border: `1.5px solid ${COLORS.blue}`, color: COLORS.blue, borderRadius: 6, padding: "12px 8px", fontSize: 13, cursor: "pointer" }}
-          >
-            Doorgaan zonder speelsternaam (alleen beheren)
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   async function submitPlayer(name) {
     setBusy(true);
