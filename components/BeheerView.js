@@ -15,8 +15,7 @@ export default function BeheerView({
   periodStart,
   onResetPeriode,
   auditLog,
-  onUpdateAuditLog,
-  onDeleteAuditLog,
+  onEditTraining,
   onStartNewSeason,
   onExportBackup,
   teamGoal,
@@ -36,9 +35,6 @@ export default function BeheerView({
   const [seizoenBevestiging, setSeizoenBevestiging] = useState("");
   const [seizoenBezig, setSeizoenBezig] = useState(false);
 
-  const [editingLogId, setEditingLogId] = useState(null);
-  const [editingLogName, setEditingLogName] = useState("");
-
   async function handleResetPeriode() {
     if (!confirm(`Periode afronden per ${nieuweStartDatum}? Het Clausement gaat terug naar 0. Het Recordboek blijft staan.`)) return;
     const result = await onResetPeriode(nieuweStartDatum);
@@ -56,23 +52,6 @@ export default function BeheerView({
     }
     setSeizoenBevestiging("");
     setShowSeizoen(false);
-  }
-
-  function startEditLog(log) {
-    setEditingLogId(log.id);
-    setEditingLogName(log.by || "");
-  }
-
-  async function saveEditLog(log) {
-    const result = await onUpdateAuditLog(log.id, { by: editingLogName });
-    if (!result.ok) setErrorMsg(result.message);
-    setEditingLogId(null);
-  }
-
-  async function handleDeleteLog(id) {
-    if (!confirm("Deze logboekregel verwijderen? Dit kan niet ongedaan gemaakt worden.")) return;
-    const result = await onDeleteAuditLog(id);
-    if (!result.ok) setErrorMsg(result.message);
   }
 
   return (
@@ -274,33 +253,26 @@ export default function BeheerView({
           {auditLog.length === 0 && <Empty text="Nog geen wijzigingen gelogd." />}
           {[...auditLog].reverse().map((log) => (
             <div key={log.id} style={{ background: COLORS.white, borderRadius: 4, padding: "8px 10px" }}>
-              {editingLogId === log.id ? (
-                <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4 }}>
-                  <input
-                    value={editingLogName}
-                    onChange={(e) => setEditingLogName(e.target.value)}
-                    style={{ ...inputStyle, padding: "6px 8px", fontSize: 12 }}
-                  />
-                  <span onClick={() => saveEditLog(log)} className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, cursor: "pointer", flexShrink: 0 }}>opslaan</span>
-                  <span onClick={() => setEditingLogId(null)} className="cy-medium" style={{ fontSize: 11.5, color: "#999", cursor: "pointer", flexShrink: 0 }}>annuleren</span>
-                </div>
-              ) : (
-                <div className="cy-regular" style={{ fontSize: 11.5, color: "#555", display: "flex", justifyContent: "space-between", gap: 8 }}>
-                  <span>
-                    <span className="cy-medium">{log.by || "onbekend"}</span>{" "}
-                    {log.action === "seizoen gestart" ? (
-                      <>heeft een nieuw seizoen gestart (vanaf {log.trainingDate})</>
-                    ) : (
-                      <>heeft training van {log.trainingDate} {log.action}</>
-                    )}
-                    <span style={{ color: "#aaa" }}> · {new Date(log.at).toLocaleString("nl-NL")}</span>
+              <div className="cy-regular" style={{ fontSize: 11.5, color: "#555", display: "flex", justifyContent: "space-between", gap: 8 }}>
+                <span>
+                  <span className="cy-medium">{log.by || "onbekend"}</span>{" "}
+                  {log.action === "seizoen gestart" ? (
+                    <>heeft een nieuw seizoen gestart (vanaf {log.trainingDate})</>
+                  ) : (
+                    <>heeft training van {log.trainingDate} {log.action}</>
+                  )}
+                  <span style={{ color: "#aaa" }}> · {new Date(log.at).toLocaleString("nl-NL")}</span>
+                </span>
+                {log.action !== "seizoen gestart" && (
+                  <span
+                    onClick={() => onEditTraining(log.trainingDate)}
+                    className="cy-medium"
+                    style={{ fontSize: 11, color: COLORS.blue, cursor: "pointer", flexShrink: 0 }}
+                  >
+                    bewerk scores
                   </span>
-                  <span style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                    <span onClick={() => startEditLog(log)} className="cy-medium" style={{ fontSize: 11, color: COLORS.blue, cursor: "pointer" }}>wijzigen</span>
-                    <span onClick={() => handleDeleteLog(log.id)} className="cy-medium" style={{ fontSize: 11, color: "#c0392b", cursor: "pointer" }}>verwijderen</span>
-                  </span>
-                </div>
-              )}
+                )}
+              </div>
               {log.action === "gewijzigd" && log.previousSummary && (
                 <div className="cy-regular" style={{ fontSize: 10.5, color: "#999", marginTop: 4 }}>
                   <div className="cy-medium" style={{ color: "#aaa" }}>was:</div>

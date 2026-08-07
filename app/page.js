@@ -16,10 +16,16 @@ import { Banner, TabButton } from "@/components/shared";
 export default function Page() {
   const auth = useAuth();
   const [view, setView] = useState("standen");
+  const [jumpToDate, setJumpToDate] = useState(null);
 
   useEffect(() => {
     if (auth.isTrainer) setView("beheer");
   }, [auth.isTrainer]);
+
+  function editTraining(date) {
+    setView("invoeren");
+    setJumpToDate({ date, token: Date.now() });
+  }
 
   if (!supabaseConfigured) {
     return (
@@ -40,7 +46,7 @@ export default function Page() {
     return <LoginGate />;
   }
 
-  return <AppShell view={view} setView={setView} />;
+  return <AppShell view={view} setView={setView} jumpToDate={jumpToDate} onEditTraining={editTraining} />;
 }
 
 function LoginGate() {
@@ -67,7 +73,7 @@ function LoginGate() {
   return <LoginScreen players={players} />;
 }
 
-function AppShell({ view, setView }) {
+function AppShell({ view, setView, jumpToDate, onEditTraining }) {
   const { myName, isTrainer, signOut } = useAuth();
   const data = useAppData();
 
@@ -178,6 +184,7 @@ function AppShell({ view, setView }) {
             onDelete={data.deleteTraining}
             saving={data.saving}
             isTrainer={isTrainer}
+            jumpToDate={jumpToDate}
           />
         )}
         {activeView === "beheer" && isTrainer && (
@@ -189,8 +196,7 @@ function AppShell({ view, setView }) {
             periodStart={data.periodStart}
             onResetPeriode={data.resetPeriode}
             auditLog={data.auditLog}
-            onUpdateAuditLog={data.updateAuditLogEntry}
-            onDeleteAuditLog={data.deleteAuditLogEntry}
+            onEditTraining={onEditTraining}
             onStartNewSeason={data.startNewSeason}
             onExportBackup={data.buildBackupString}
             teamGoal={data.teamGoal}

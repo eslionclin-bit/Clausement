@@ -323,20 +323,6 @@ export function AppDataProvider({ children }) {
     return { ok: true };
   }
 
-  async function updateAuditLogEntry(id, { by }) {
-    const { error: err } = await supabase.from("audit_log").update({ by_name: by }).eq("id", id);
-    if (err) return { ok: false, message: err.message };
-    await load();
-    return { ok: true };
-  }
-
-  async function deleteAuditLogEntry(id) {
-    const { error: err } = await supabase.from("audit_log").delete().eq("id", id);
-    if (err) return { ok: false, message: err.message };
-    await load();
-    return { ok: true };
-  }
-
   async function startNewSeason(startDate) {
     const { error: err } = await supabase.rpc("start_new_season", { p_actor: myName, p_start_date: startDate });
     if (err) return { ok: false, message: err.message };
@@ -396,8 +382,6 @@ export function AppDataProvider({ children }) {
     deleteCustomExercise,
     setTeamGoal,
     resetPeriode,
-    updateAuditLogEntry,
-    deleteAuditLogEntry,
     startNewSeason,
     buildBackupString,
   };

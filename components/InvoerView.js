@@ -6,7 +6,7 @@ import { previewDoelPunten } from "@/lib/logic";
 import { todayISO } from "@/lib/util";
 import { Banner, Empty, Field, MiniNum, inputStyle } from "./shared";
 
-export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving, isTrainer }) {
+export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving, isTrainer, jumpToDate }) {
   const emptyRows = () => Object.fromEntries(players.map((p) => [p.id, { openingsspel: 0, doel: 0, doelRaw: "", wedstrijd: "" }]));
 
   function defaultOpenSet() {
@@ -121,6 +121,16 @@ export default function InvoerView({ players, trainings, myName, goals, personal
     setOpenPlayers(defaultOpenSet());
   }
 
+  // Vanuit Beheer ("bewerk scores" bij een logboekregel) spring je hierheen
+  // met een specifieke datum al klaarstaand.
+  useEffect(() => {
+    if (!jumpToDate) return;
+    handleDateChange(jumpToDate.date);
+    setShowHistorie(false);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jumpToDate]);
+
   async function handleSave() {
     setErrorMsg("");
     const result = await onSubmit({ date, rows, trainingId: editingId });
@@ -147,7 +157,20 @@ export default function InvoerView({ players, trainings, myName, goals, personal
   const bewerkbaarNu = !editingId || binnenBewerkVenster(editingMeta);
 
   return (
-    <div>
+    <div style={{ paddingBottom: 84 }}>
+      <div style={{ position: "fixed", left: 0, right: 0, bottom: 0, background: COLORS.paper, borderTop: "1px solid #e2e2ea", padding: "10px 16px", boxShadow: "0 -2px 10px rgba(0,0,0,.08)", zIndex: 40 }}>
+        <div style={{ maxWidth: 480, margin: "0 auto" }}>
+          <button
+            onClick={handleSave}
+            disabled={saving || players.length === 0 || !bewerkbaarNu}
+            className="cy-black"
+            style={{ width: "100%", background: COLORS.yellow, color: COLORS.black, border: "none", borderRadius: 6, padding: "14px 8px", fontSize: 15, cursor: players.length === 0 || !bewerkbaarNu ? "not-allowed" : "pointer", opacity: players.length === 0 || !bewerkbaarNu ? 0.5 : 1 }}
+          >
+            {saving ? "OPSLAAN…" : !bewerkbaarNu ? "ALLEEN TRAINER KAN DIT NOG WIJZIGEN" : editingId ? "WIJZIGING OPSLAAN" : "TRAINING OPSLAAN"}
+          </button>
+          {savedMsg && <div className="cy-medium" style={{ textAlign: "center", color: COLORS.blue, marginTop: 6, fontSize: 13 }}>{savedMsg}</div>}
+        </div>
+      </div>
       {showStrike && (
         <div style={{ position: "fixed", top: "40%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 999, pointerEvents: "none" }}>
           <div className="strike-badge cy-black" style={{ background: COLORS.yellow, color: COLORS.black, fontSize: 32, padding: "14px 28px", borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,.35)", letterSpacing: 1 }}>
@@ -272,19 +295,9 @@ export default function InvoerView({ players, trainings, myName, goals, personal
       {players.length === 0 && <Empty text="Voeg eerst speelsters toe via Beheer." />}
 
       <button
-        onClick={handleSave}
-        disabled={saving || players.length === 0 || !bewerkbaarNu}
-        className="cy-black"
-        style={{ width: "100%", marginTop: 18, background: COLORS.yellow, color: COLORS.black, border: "none", borderRadius: 6, padding: "14px 8px", fontSize: 15, cursor: players.length === 0 || !bewerkbaarNu ? "not-allowed" : "pointer", opacity: players.length === 0 || !bewerkbaarNu ? 0.5 : 1 }}
-      >
-        {saving ? "OPSLAAN…" : !bewerkbaarNu ? "ALLEEN TRAINER KAN DIT NOG WIJZIGEN" : editingId ? "WIJZIGING OPSLAAN" : "TRAINING OPSLAAN"}
-      </button>
-      {savedMsg && <div className="cy-medium" style={{ textAlign: "center", color: COLORS.blue, marginTop: 10, fontSize: 13 }}>{savedMsg}</div>}
-
-      <button
         onClick={() => setShowHistorie((v) => !v)}
         className="cy-medium"
-        style={{ width: "100%", marginTop: 22, background: "none", border: `1.5px solid ${COLORS.blue}`, color: COLORS.blue, borderRadius: 6, padding: "10px 8px", fontSize: 13, cursor: "pointer" }}
+        style={{ width: "100%", marginTop: 18, background: "none", border: `1.5px solid ${COLORS.blue}`, color: COLORS.blue, borderRadius: 6, padding: "10px 8px", fontSize: 13, cursor: "pointer" }}
       >
         {showHistorie ? "Geschiedenis verbergen" : `Eerder ingevoerd (${trainings.length}) — bekijk, wijzig of verwijder`}
       </button>
