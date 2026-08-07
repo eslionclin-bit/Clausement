@@ -17,6 +17,7 @@ export default function Page() {
   const auth = useAuth();
   const [view, setView] = useState("standen");
   const [jumpToDate, setJumpToDate] = useState(null);
+  const [invoerDirty, setInvoerDirty] = useState(false);
 
   useEffect(() => {
     if (auth.isTrainer) setView("beheer");
@@ -46,7 +47,16 @@ export default function Page() {
     return <LoginGate />;
   }
 
-  return <AppShell view={view} setView={setView} jumpToDate={jumpToDate} onEditTraining={editTraining} />;
+  return (
+    <AppShell
+      view={view}
+      setView={setView}
+      jumpToDate={jumpToDate}
+      onEditTraining={editTraining}
+      invoerDirty={invoerDirty}
+      onInvoerDirtyChange={setInvoerDirty}
+    />
+  );
 }
 
 function LoginGate() {
@@ -73,9 +83,22 @@ function LoginGate() {
   return <LoginScreen players={players} />;
 }
 
-function AppShell({ view, setView, jumpToDate, onEditTraining }) {
+function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onInvoerDirtyChange }) {
   const { myName, isTrainer, signOut } = useAuth();
   const data = useAppData();
+
+  const ONOPGESLAGEN_WAARSCHUWING =
+    "Je hebt nog niet-opgeslagen wijzigingen bij Invoeren. Wil je toch doorgaan? Je invoer gaat dan verloren.";
+
+  function switchView(key) {
+    if (view === "invoeren" && invoerDirty && key !== "invoeren" && !confirm(ONOPGESLAGEN_WAARSCHUWING)) return;
+    setView(key);
+  }
+
+  function handleSignOut() {
+    if (view === "invoeren" && invoerDirty && !confirm(ONOPGESLAGEN_WAARSCHUWING)) return;
+    signOut();
+  }
 
   if (data.loading) return <LoadingScreen />;
 
@@ -117,7 +140,7 @@ function AppShell({ view, setView, jumpToDate, onEditTraining }) {
             <span className="cy-black" style={{ color: COLORS.white, fontSize: 18, letterSpacing: 0.3 }}>HET CLAUSEMENT</span>
           </div>
           <button
-            onClick={signOut}
+            onClick={handleSignOut}
             className="cy-regular"
             style={{ background: "none", border: "none", color: COLORS.lightBlue, fontSize: 11, cursor: "pointer" }}
           >
@@ -126,7 +149,7 @@ function AppShell({ view, setView, jumpToDate, onEditTraining }) {
         </div>
         <div style={{ display: "flex" }}>
           {tabs.map((t) => (
-            <TabButton key={t.key} active={activeView === t.key} onClick={() => setView(t.key)}>
+            <TabButton key={t.key} active={activeView === t.key} onClick={() => switchView(t.key)}>
               {t.label}
             </TabButton>
           ))}
@@ -185,6 +208,7 @@ function AppShell({ view, setView, jumpToDate, onEditTraining }) {
             saving={data.saving}
             isTrainer={isTrainer}
             jumpToDate={jumpToDate}
+            onDirtyChange={onInvoerDirtyChange}
           />
         )}
         {activeView === "beheer" && isTrainer && (

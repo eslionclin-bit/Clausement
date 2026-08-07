@@ -6,7 +6,7 @@ import { previewDoelPunten } from "@/lib/logic";
 import { todayISO } from "@/lib/util";
 import { Banner, Empty, Field, MiniNum, inputStyle } from "./shared";
 
-export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving, isTrainer, jumpToDate }) {
+export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving, isTrainer, jumpToDate, onDirtyChange }) {
   const emptyRows = () => Object.fromEntries(players.map((p) => [p.id, { openingsspel: 0, doel: 0, doelRaw: "", wedstrijd: "" }]));
 
   function defaultOpenSet() {
@@ -32,6 +32,28 @@ export default function InvoerView({ players, trainings, myName, goals, personal
   const [showHistorie, setShowHistorie] = useState(false);
   const [openMonths, setOpenMonths] = useState(() => new Set([todayISO().slice(0, 7)]));
   const [openPlayers, setOpenPlayers] = useState(defaultOpenSet);
+  const [isDirty, setIsDirty] = useState(false);
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
+
+  // Waarschuw bij het sluiten/verversen van het tabblad zolang er nog
+  // niet-opgeslagen invoer staat.
+  useEffect(() => {
+    function handler(e) {
+      if (!isDirty) return;
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
+  function confirmDiscard() {
+    if (!isDirty) return true;
+    return confirm("Je hebt nog niet-opgeslagen wijzigingen bij Invoeren. Wil je toch doorgaan? Je invoer gaat dan verloren.");
+  }
 
   function togglePlayer(pid) {
     setOpenPlayers((prev) => {
@@ -62,7 +84,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
   }, [players]);
 
   useEffect(() => {
-    if (editingId) return;
+    if (editingId || isDirty) return;
     const bestaande = trainings.find((t) => t.date === date);
     if (bestaande) {
       setEditingId(bestaande.id);
@@ -78,9 +100,11 @@ export default function InvoerView({ players, trainings, myName, goals, personal
 
   function updateRow(pid, field, value) {
     setRows((prev) => ({ ...prev, [pid]: { ...prev[pid], [field]: value } }));
+    setIsDirty(true);
   }
 
   function startEdit(training) {
+    if (!confirmDiscard()) return;
     setEditingId(training.id);
     setEditingMeta({ enteredBy: training.enteredBy, enteredAt: training.enteredAt });
     setDate(training.date);
@@ -89,6 +113,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
       filled[pid] = { openingsspel: 0, doel: 0, doelRaw: "", wedstrijd: "", ...vals };
     });
     setRows(filled);
+    setIsDirty(false);
     setShowHistorie(false);
     setOpenPlayers(defaultOpenSet());
   }
@@ -98,11 +123,19 @@ export default function InvoerView({ players, trainings, myName, goals, personal
     setEditingMeta(null);
     setDate(todayISO());
     setRows(emptyRows());
+    setIsDirty(false);
     setOpenPlayers(defaultOpenSet());
+  }
+
+  function requestCancelEdit() {
+    if (!confirmDiscard()) return;
+    cancelEdit();
   }
 
   function handleDateChange(nieuweDatum) {
     if (nieuweDatum > todayISO()) return;
+    if (nieuweDatum === date) return;
+    if (!confirmDiscard()) return;
     setDate(nieuweDatum);
     const bestaande = trainings.find((t) => t.date === nieuweDatum);
     if (bestaande) {
@@ -118,6 +151,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
       setEditingMeta(null);
       setRows(emptyRows());
     }
+    setIsDirty(false);
     setOpenPlayers(defaultOpenSet());
   }
 
@@ -181,14 +215,14 @@ export default function InvoerView({ players, trainings, myName, goals, personal
       {editingId && bewerkbaarNu && (
         <Banner tone="light">
           Er staat al een training op {date} — de bestaande gegevens zijn geladen. Opslaan werkt bij.{" "}
-          <span onClick={cancelEdit} style={{ textDecoration: "underline", cursor: "pointer" }}>annuleren</span>
+          <span onClick={requestCancelEdit} style={{ textDecoration: "underline", cursor: "pointer" }}>annuleren</span>
         </Banner>
       )}
       {editingId && !bewerkbaarNu && (
         <Banner tone="yellow">
           Deze training is niet meer op dezelfde dag ingevoerd, dus kan je 'm als speler niet meer wijzigen —
           vraag de trainer. Je ziet de ingevoerde waarden hieronder wel ter controle.{" "}
-          <span onClick={cancelEdit} style={{ textDecoration: "underline", cursor: "pointer" }}>sluiten</span>
+          <span onClick={requestCancelEdit} style={{ textDecoration: "underline", cursor: "pointer" }}>sluiten</span>
         </Banner>
       )}
       {errorMsg && <Banner tone="yellow">{errorMsg}</Banner>}
