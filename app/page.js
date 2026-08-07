@@ -191,6 +191,10 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
             onAddCustomExercise={data.addCustomExercise}
             onUpdateCustomExercise={data.updateCustomExercise}
             onDeleteCustomExercise={data.deleteCustomExercise}
+            rivalries={data.rivalries}
+            onProposeRivalry={data.proposeRivalry}
+            onRespondRivalry={data.respondRivalry}
+            onEndRivalry={data.endRivalry}
             isTrainer={isTrainer}
           />
         )}

@@ -5,6 +5,7 @@ import { COLORS } from "@/lib/constants";
 import { doelGeschiedenisVoorSpeler, doelPerPeriode } from "@/lib/logic";
 import { addDays, todayISO } from "@/lib/util";
 import { Banner, Empty, RankBadge, inputStyle } from "./shared";
+import RivaliteitPanel from "./RivaliteitPanel";
 
 function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise, onUpdateCustomExercise, onDeleteCustomExercise }) {
   const [showOefeningen, setShowOefeningen] = useState(false);
@@ -229,6 +230,10 @@ export default function RecordboekView({
   onAddCustomExercise,
   onUpdateCustomExercise,
   onDeleteCustomExercise,
+  rivalries,
+  onProposeRivalry,
+  onRespondRivalry,
+  onEndRivalry,
   isTrainer,
 }) {
   const trend = useMemo(() => {
@@ -403,6 +408,18 @@ export default function RecordboekView({
           )}
         </div>
       )}
+
+      <RivaliteitPanel
+        mijnSpeler={mijnSpeler}
+        mijnDoel={mijnDoel}
+        players={players}
+        goals={goals}
+        personalRecords={personalRecords}
+        rivalries={rivalries}
+        onProposeRivalry={onProposeRivalry}
+        onRespondRivalry={onRespondRivalry}
+        onEndRivalry={onEndRivalry}
+      />
 
       {mijnSpeler && mijnGeschiedenis.length > 0 && (
         <div style={{ marginBottom: 18 }}>

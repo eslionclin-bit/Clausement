@@ -59,6 +59,7 @@ export function AppDataProvider({ children }) {
   const [periodHistory, setPeriodHistory] = useState([]);
   const [teamGoal, setTeamGoalState] = useState(null);
   const [auditLog, setAuditLog] = useState([]);
+  const [rivalries, setRivalries] = useState([]);
   const [saving, setSaving] = useState(false);
 
   const refreshTimer = useRef(null);
@@ -81,6 +82,7 @@ export function AppDataProvider({ children }) {
         periodsRes,
         teamGoalRes,
         auditRes,
+        rivalriesRes,
       ] = await Promise.all([
         supabase.from("players").select("*").order("name"),
         supabase.from("trainings").select("*, training_scores(*)"),
@@ -92,6 +94,7 @@ export function AppDataProvider({ children }) {
         supabase.from("periods").select("*").order("number"),
         supabase.from("team_goal").select("*").maybeSingle(),
         isTrainer ? supabase.from("audit_log").select("*").order("at") : Promise.resolve({ data: [], error: null }),
+        supabase.from("rivalries").select("*"),
       ]);
 
       const firstError = [
@@ -105,6 +108,7 @@ export function AppDataProvider({ children }) {
         periodsRes,
         teamGoalRes,
         auditRes,
+        rivalriesRes,
       ].find((r) => r.error);
       if (firstError) throw firstError.error;
 
@@ -158,6 +162,20 @@ export function AppDataProvider({ children }) {
       setPeriodHistory(history.map((p) => ({ number: p.number, start: p.start_date, end: p.end_date })));
 
       setTeamGoalState(teamGoalRes.data ? teamGoalRes.data.target : null);
+      setRivalries(
+        (rivalriesRes.data || []).map((r) => ({
+          id: r.id,
+          exerciseId: r.exercise_id,
+          playerA: r.player_a,
+          playerAAssignmentId: r.player_a_assignment_id,
+          playerB: r.player_b,
+          playerBAssignmentId: r.player_b_assignment_id,
+          proposedBy: r.proposed_by,
+          status: r.status,
+          createdAt: r.created_at,
+          acceptedAt: r.accepted_at,
+        }))
+      );
       setAuditLog(
         (auditRes.data || []).map((l) => ({
           id: l.id,
@@ -330,6 +348,27 @@ export function AppDataProvider({ children }) {
     return { ok: true };
   }
 
+  async function proposeRivalry(fromPlayerId, toPlayerId) {
+    const { error: err } = await supabase.rpc("propose_rivalry", { p_from_player_id: fromPlayerId, p_to_player_id: toPlayerId });
+    if (err) return { ok: false, message: err.message };
+    await load();
+    return { ok: true };
+  }
+
+  async function respondRivalry(rivalryId, playerId, accept) {
+    const { error: err } = await supabase.rpc("respond_rivalry", { p_rivalry_id: rivalryId, p_player_id: playerId, p_accept: accept });
+    if (err) return { ok: false, message: err.message };
+    await load();
+    return { ok: true };
+  }
+
+  async function endRivalry(rivalryId, playerId) {
+    const { error: err } = await supabase.rpc("end_rivalry", { p_rivalry_id: rivalryId, p_player_id: playerId });
+    if (err) return { ok: false, message: err.message };
+    await load();
+    return { ok: true };
+  }
+
   function buildBackupString() {
     return JSON.stringify(
       {
@@ -369,6 +408,7 @@ export function AppDataProvider({ children }) {
     periodHistory,
     teamGoal,
     auditLog,
+    rivalries,
     recordboek,
     saving,
     refresh: load,
@@ -383,6 +423,9 @@ export function AppDataProvider({ children }) {
     setTeamGoal,
     resetPeriode,
     startNewSeason,
+    proposeRivalry,
+    respondRivalry,
+    endRivalry,
     buildBackupString,
   };
 
