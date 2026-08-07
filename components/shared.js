@@ -65,7 +65,7 @@ export function Banner({ tone = "yellow", children }) {
   );
 }
 
-export function TabButton({ active, onClick, children }) {
+export function TabButton({ active, onClick, badge, children }) {
   return (
     <button
       onClick={onClick}
@@ -81,9 +81,27 @@ export function TabButton({ active, onClick, children }) {
         opacity: active ? 1 : 0.75,
         cursor: "pointer",
         transition: "all .15s",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
       }}
     >
       {children}
+      {badge > 0 && (
+        <span
+          className="cy-black"
+          style={{
+            fontSize: 10,
+            color: active ? COLORS.white : COLORS.black,
+            background: active ? COLORS.blue : COLORS.yellow,
+            padding: "2px 6px",
+            borderRadius: 10,
+          }}
+        >
+          {badge}
+        </span>
+      )}
     </button>
   );
 }

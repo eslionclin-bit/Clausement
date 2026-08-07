@@ -120,10 +120,17 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
     auditLog: data.auditLog,
   });
 
+  const mijnSpeler = data.players.find((p) => p.name === myName);
+  const inkomendeUitdagingen = mijnSpeler
+    ? data.rivalries.filter(
+        (r) => (r.playerA === mijnSpeler.id || r.playerB === mijnSpeler.id) && r.status === "voorgesteld" && r.proposedBy !== mijnSpeler.id
+      ).length
+    : 0;
+
   const tabs = [
     { key: "standen", label: "Standen" },
     { key: "invoeren", label: "Invoeren" },
-    { key: "recordboek", label: "Recordboek" },
+    { key: "recordboek", label: "Recordboek", badge: inkomendeUitdagingen },
   ];
   if (isTrainer) tabs.push({ key: "beheer", label: "Beheer" });
   const activeView = view === "beheer" && !isTrainer ? "standen" : view;
@@ -149,7 +156,7 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
         </div>
         <div style={{ display: "flex" }}>
           {tabs.map((t) => (
-            <TabButton key={t.key} active={activeView === t.key} onClick={() => switchView(t.key)}>
+            <TabButton key={t.key} active={activeView === t.key} onClick={() => switchView(t.key)} badge={t.badge}>
               {t.label}
             </TabButton>
           ))}
