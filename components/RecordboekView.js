@@ -323,7 +323,7 @@ export default function RecordboekView({
 
   async function kiesDoel(ex) {
     if (vol(ex) || herhaling(ex)) return;
-    if (mijnDoel && aantalGeoefend < 4) {
+    if (mijnDoel && aantalGeoefend > 0 && aantalGeoefend < 4) {
       const bevestigd = confirm(
         `Je hebt "${mijnDoel.exerciseName}" nog geen 4x geoefend. Als je nu wisselt, vervallen je scores en je record van dit doel. Doorgaan?`
       );
@@ -375,7 +375,9 @@ export default function RecordboekView({
               {aantalGeoefend}x geoefend
               {aantalGeoefend >= 4
                 ? " — tijd voor een nieuw doel!"
-                : " van de 4x — wissel je eerder, dan vervallen je scores van dit doel"}
+                : aantalGeoefend > 0
+                  ? " van de 4x — wissel je eerder, dan vervallen je scores van dit doel"
+                  : " van de 4x"}
             </div>
           )}
           {!mijnDoelExercise && <div style={{ marginBottom: 10 }} />}
