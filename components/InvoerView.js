@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { COLORS } from "@/lib/constants";
 import { previewDoelPunten } from "@/lib/logic";
 import { todayISO } from "@/lib/util";
-import { Banner, Empty, Field, MiniNum, TextButton, inputStyle } from "./shared";
+import { Banner, Empty, Field, MiniNum, TextButton, inputStyle, usePrefersReducedMotion } from "./shared";
+import { SaveBallIcon, StrikeCelebration } from "./BowlingAnimations";
 
 export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving, isTrainer, jumpToDate, onDirtyChange }) {
   const emptyRows = () => Object.fromEntries(players.map((p) => [p.id, { openingsspel: 0, doel: 0, doelRaw: "", wedstrijd: "" }]));
@@ -29,6 +30,8 @@ export default function InvoerView({ players, trainings, myName, goals, personal
   const [savedMsg, setSavedMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [showStrike, setShowStrike] = useState(false);
+  const [showSaveBounce, setShowSaveBounce] = useState(false);
+  const reducedMotion = usePrefersReducedMotion();
   const [showHistorie, setShowHistorie] = useState(false);
   const [openMonths, setOpenMonths] = useState(() => new Set([todayISO().slice(0, 7)]));
   const [openPlayers, setOpenPlayers] = useState(defaultOpenSet);
@@ -172,10 +175,16 @@ export default function InvoerView({ players, trainings, myName, goals, personal
       setErrorMsg(result.message || "Opslaan is niet gelukt.");
       return;
     }
-    setSavedMsg(editingId ? "Training bijgewerkt ✓" : "Training opgeslagen ✓");
-    if (result.anyRecord) {
-      setShowStrike(true);
-      setTimeout(() => setShowStrike(false), 1500);
+    const basis = editingId ? "Training bijgewerkt" : "Training opgeslagen";
+    setSavedMsg(result.anyRecord ? `${basis} — nieuw record! 🏆 ✓` : `${basis} ✓`);
+    if (!reducedMotion) {
+      if (result.anyRecord) {
+        setShowStrike(true);
+        setTimeout(() => setShowStrike(false), 2000);
+      } else {
+        setShowSaveBounce(true);
+        setTimeout(() => setShowSaveBounce(false), 900);
+      }
     }
     cancelEdit();
     setTimeout(() => setSavedMsg(""), 2500);
@@ -202,16 +211,15 @@ export default function InvoerView({ players, trainings, myName, goals, personal
           >
             {saving ? "OPSLAAN…" : !bewerkbaarNu ? "ALLEEN TRAINER KAN DIT NOG WIJZIGEN" : editingId ? "WIJZIGING OPSLAAN" : "TRAINING OPSLAAN"}
           </button>
-          {savedMsg && <div className="cy-medium" style={{ textAlign: "center", color: COLORS.blue, marginTop: 6, fontSize: 13 }}>{savedMsg}</div>}
+          {savedMsg && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 6 }}>
+              {showSaveBounce && <SaveBallIcon />}
+              <div className="cy-medium" style={{ color: COLORS.blue, fontSize: 13 }}>{savedMsg}</div>
+            </div>
+          )}
         </div>
       </div>
-      {showStrike && (
-        <div style={{ position: "fixed", top: "40%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 999, pointerEvents: "none" }}>
-          <div className="strike-badge cy-black" style={{ background: COLORS.yellow, color: COLORS.black, fontSize: 32, padding: "14px 28px", borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,.35)", letterSpacing: 1 }}>
-            STRIKE! 🎳
-          </div>
-        </div>
-      )}
+      {showStrike && <StrikeCelebration />}
       {editingId && !bewerkbaarNu && (
         <Banner tone="yellow">
           Deze training is niet meer op dezelfde dag ingevoerd, dus kan je 'm als speler niet meer wijzigen —

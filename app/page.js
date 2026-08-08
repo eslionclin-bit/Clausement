@@ -11,7 +11,8 @@ import StandenView from "@/components/StandenView";
 import RecordboekView from "@/components/RecordboekView";
 import InvoerView from "@/components/InvoerView";
 import BeheerView from "@/components/BeheerView";
-import { Banner, TabButton } from "@/components/shared";
+import { Banner, TabButton, usePrefersReducedMotion } from "@/components/shared";
+import { LoadingLane } from "@/components/BowlingAnimations";
 
 export default function Page() {
   const auth = useAuth();
@@ -136,7 +137,7 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
   const activeView = view === "beheer" && !isTrainer ? "standen" : view;
 
   return (
-    <div style={{ minHeight: "100vh", background: COLORS.paper }}>
+    <div className="fade-in" style={{ minHeight: "100vh", background: COLORS.paper }}>
       <div className="header-gradient" style={{ padding: "16px 16px 0" }}>
         <div style={{ maxWidth: 480, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -252,9 +253,15 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
 }
 
 function LoadingScreen() {
+  const reducedMotion = usePrefersReducedMotion();
   return (
-    <div style={{ minHeight: "100vh", background: COLORS.blue, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div className="cy-black" style={{ color: COLORS.white, fontSize: 20 }}>LADEN…</div>
+    <div style={{ minHeight: "100vh", background: COLORS.blue, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
+      <div style={{ background: COLORS.white, borderRadius: 8, padding: "8px 16px", display: "flex", alignItems: "center" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={LOGO_SRC} alt="VCH" style={{ height: 30, width: "auto", display: "block" }} />
+      </div>
+      <div className="cy-black" style={{ color: COLORS.white, fontSize: 15, letterSpacing: 1 }}>HET CLAUSEMENT</div>
+      <LoadingLane animated={!reducedMotion} />
     </div>
   );
 }

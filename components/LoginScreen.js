@@ -31,7 +31,7 @@ export default function LoginScreen({ players }) {
   }
 
   return (
-    <div className="header-gradient" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="header-gradient fade-in" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <Header subtitle={trainerMode ? "Trainer-login" : "Klik op je naam om verder te gaan"} />
       <div style={{ flex: 1, background: COLORS.paper, borderRadius: "24px 24px 0 0", padding: 20, overflowY: "auto" }}>
         {trainerMode ? (

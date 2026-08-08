@@ -1,6 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { COLORS, FONT_IMPORT } from "@/lib/constants";
+
+// Voor animaties die prefers-reduced-motion moeten respecteren: als dit true
+// is, tonen componenten alleen een korte statische bevestiging (geen
+// beweging) i.p.v. de bal/kegel-animaties.
+export function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const handler = (e) => setReduced(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return reduced;
+}
 
 export function GlobalStyle() {
   return (
@@ -32,7 +48,69 @@ export function GlobalStyle() {
         100% { transform: scale(1) rotate(0deg); opacity: 0; }
       }
       .strike-badge {
-        animation: strikePop 1.4s ease forwards;
+        animation: strikePop 1.1s ease .5s both;
+      }
+      @keyframes ballRollShort {
+        0% { transform: translateX(-22px) rotate(0deg); opacity: 0; }
+        20% { opacity: 1; }
+        100% { transform: translateX(0) rotate(260deg); opacity: 1; }
+      }
+      .save-ball {
+        animation: ballRollShort .7s cubic-bezier(.34,1.2,.64,1) both;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      @keyframes strikeBallRoll {
+        0% { transform: translateX(-110px) rotate(0deg); opacity: 0; }
+        10% { opacity: 1; }
+        62% { transform: translateX(0) rotate(430deg); opacity: 1; }
+        100% { transform: translateX(0) rotate(430deg); opacity: 1; }
+      }
+      .strike-ball {
+        animation: strikeBallRoll .8s cubic-bezier(.3,.9,.4,1) both;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      @keyframes pinScatterA {
+        0%, 58% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(14px,-16px) rotate(80deg); opacity: 0; }
+      }
+      @keyframes pinScatterB {
+        0%, 58% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(-8px,-20px) rotate(-70deg); opacity: 0; }
+      }
+      @keyframes pinScatterC {
+        0%, 58% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(20px,-6px) rotate(100deg); opacity: 0; }
+      }
+      @keyframes pinScatterD {
+        0%, 58% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(-4px,-22px) rotate(-110deg); opacity: 0; }
+      }
+      .strike-pin-a { animation: pinScatterA .55s ease-in .46s both; transform-box: fill-box; transform-origin: center; }
+      .strike-pin-b { animation: pinScatterB .55s ease-in .49s both; transform-box: fill-box; transform-origin: center; }
+      .strike-pin-c { animation: pinScatterC .55s ease-in .44s both; transform-box: fill-box; transform-origin: center; }
+      .strike-pin-d { animation: pinScatterD .55s ease-in .51s both; transform-box: fill-box; transform-origin: center; }
+      @keyframes loadingBallRoll {
+        0% { transform: translateX(0) rotate(0deg); }
+        100% { transform: translateX(95px) rotate(360deg); }
+      }
+      .loading-ball {
+        animation: loadingBallRoll 1.1s linear infinite;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .fade-in {
+        animation: fadeInUp .4s ease both;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .strike-badge, .save-ball, .strike-ball, .strike-pin-a, .strike-pin-b, .strike-pin-c, .strike-pin-d, .loading-ball, .fade-in {
+          animation: none !important;
+        }
       }
       button { transition: transform .1s ease, box-shadow .15s ease, opacity .15s ease; }
       button:active { transform: scale(0.97); }
