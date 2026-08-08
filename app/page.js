@@ -234,6 +234,7 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
             periodNumber={data.periodNumber}
             periodStart={data.periodStart}
             onResetPeriode={data.resetPeriode}
+            onUpdatePeriodStart={data.updatePeriodStart}
             auditLog={data.auditLog}
             onEditTraining={onEditTraining}
             onStartNewSeason={data.startNewSeason}

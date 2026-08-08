@@ -354,6 +354,13 @@ export function AppDataProvider({ children }) {
     return { ok: true };
   }
 
+  async function updatePeriodStart(startDate) {
+    const { error: err } = await supabase.rpc("update_period_start", { p_actor: myName, p_start_date: startDate });
+    if (err) return { ok: false, message: err.message };
+    await load();
+    return { ok: true };
+  }
+
   async function startNewSeason(startDate) {
     const { error: err } = await supabase.rpc("start_new_season", { p_actor: myName, p_start_date: startDate });
     if (err) return { ok: false, message: err.message };
@@ -437,6 +444,7 @@ export function AppDataProvider({ children }) {
     deleteCustomExercise,
     setTeamGoal,
     resetPeriode,
+    updatePeriodStart,
     startNewSeason,
     proposeRivalry,
     respondRivalry,

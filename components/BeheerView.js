@@ -118,6 +118,7 @@ export default function BeheerView({
   goals,
   trainings,
   onSetGoal,
+  onUpdatePeriodStart,
 }) {
   const [naam, setNaam] = useState("");
   const [showLog, setShowLog] = useState(false);
@@ -127,6 +128,25 @@ export default function BeheerView({
   const [errorMsg, setErrorMsg] = useState("");
   const [nieuweStartDatum, setNieuweStartDatum] = useState(todayISO());
   const dagen = daysBetween(periodStart, todayISO());
+
+  const [startDatumBewerken, setStartDatumBewerken] = useState(false);
+  const [bewerkStartDatum, setBewerkStartDatum] = useState(periodStart);
+  const [startDatumBezig, setStartDatumBezig] = useState(false);
+  const [startDatumMsg, setStartDatumMsg] = useState("");
+
+  async function handleUpdatePeriodStart() {
+    setStartDatumBezig(true);
+    setStartDatumMsg("");
+    const result = await onUpdatePeriodStart(bewerkStartDatum);
+    setStartDatumBezig(false);
+    if (!result.ok) {
+      setStartDatumMsg(result.message || "Startdatum aanpassen is niet gelukt.");
+      return;
+    }
+    setStartDatumBewerken(false);
+    setStartDatumMsg("Startdatum aangepast ✓");
+    setTimeout(() => setStartDatumMsg(""), 4000);
+  }
 
   const [showSeizoen, setShowSeizoen] = useState(false);
   const [seizoenStartDatum, setSeizoenStartDatum] = useState(todayISO());
@@ -162,7 +182,30 @@ export default function BeheerView({
 
       <div className="scorepanel" style={{ padding: 14, marginBottom: 18 }}>
         <div className="cy-medium" style={{ fontSize: 13, marginBottom: 4 }}>Periode {periodNumber} — dag {dagen} van ~56</div>
-        <div className="cy-regular" style={{ fontSize: 11, color: COLORS.lightBlue, marginBottom: 10 }}>Start: {periodStart}</div>
+        <div className="cy-regular" style={{ fontSize: 11, color: COLORS.lightBlue, marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}>
+          Start: {periodStart}
+          <TextButton onClick={() => { setStartDatumBewerken((v) => !v); setBewerkStartDatum(periodStart); }} style={{ fontSize: 10.5, color: COLORS.yellow }}>
+            {startDatumBewerken ? "annuleren" : "aanpassen"}
+          </TextButton>
+        </div>
+        {startDatumBewerken && (
+          <div style={{ marginBottom: 10 }}>
+            <input type="date" value={bewerkStartDatum} onChange={(e) => setBewerkStartDatum(e.target.value)} style={{ ...inputStyle, marginBottom: 6 }} />
+            <button
+              onClick={handleUpdatePeriodStart}
+              disabled={startDatumBezig}
+              className="cy-medium"
+              style={{ width: "100%", background: "none", border: `1.5px solid ${COLORS.lightBlue}`, color: COLORS.white, borderRadius: 6, padding: "8px 8px", fontSize: 12.5, cursor: "pointer" }}
+            >
+              {startDatumBezig ? "Bezig…" : "Startdatum opslaan"}
+            </button>
+          </div>
+        )}
+        {startDatumMsg && (
+          <div className="cy-medium" style={{ fontSize: 11.5, color: startDatumMsg.endsWith("✓") ? "#7fe0a8" : "#ff8a8a", marginBottom: 10 }}>
+            {startDatumMsg}
+          </div>
+        )}
         <div style={{ marginBottom: 10 }}>
           <div className="cy-regular" style={{ fontSize: 11, color: COLORS.lightBlue, marginBottom: 4 }}>
             Startdatum volgende periode (hoeft niet direct aan te sluiten)
