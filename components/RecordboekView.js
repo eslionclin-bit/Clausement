@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { COLORS } from "@/lib/constants";
-import { doelGeschiedenisVoorSpeler, doelPerPeriode } from "@/lib/logic";
+import { aantalKeerGeoefend, doelGeschiedenisVoorSpeler, doelPerPeriode } from "@/lib/logic";
 import { addDays, todayISO } from "@/lib/util";
 import { Banner, Empty, RankBadge, TextButton, inputStyle } from "./shared";
 import RivaliteitPanel from "./RivaliteitPanel";
@@ -259,12 +259,11 @@ export default function RecordboekView({
   const [zoek, setZoek] = useState("");
   const [foutmelding, setFoutmelding] = useState("");
 
-  const aantalGeoefend = useMemo(() => {
-    if (!mijnSpeler || !mijnDoel) return 0;
-    return trainings.filter(
-      (t) => t.date >= mijnDoel.chosenAt && t.spelers?.[mijnSpeler.id]?.doelRaw !== "" && t.spelers?.[mijnSpeler.id]?.doelRaw !== undefined
-    ).length;
-  }, [trainings, mijnSpeler, mijnDoel]);
+  const aantalGeoefend = useMemo(
+    () => (mijnSpeler ? aantalKeerGeoefend(trainings, mijnSpeler.id, mijnDoel) : 0),
+    [trainings, mijnSpeler, mijnDoel]
+  );
+  const kanWisselen = !mijnDoel || aantalGeoefend >= 4;
 
   const huidigeExerciseId = mijnDoel ? mijnDoel.exerciseId : null;
 
@@ -316,9 +315,10 @@ export default function RecordboekView({
     <div>
       <div className="cy-regular" style={{ fontSize: 12, color: "#666", marginBottom: 14, lineHeight: 1.5 }}>
         Het Recordboek reset nooit — dit zijn de doel-punten van elke speelster over het hele seizoen.
-        Kies zelf wanneer je wisselt; na 4x oefenen krijg je een seintje dat het tijd is voor een nieuw doel.
-        Net en veld zijn er maar één keer: je mag daar samen met anderen hetzelfde doel oefenen, maar niet
-        een ander doel kiezen als het net of veld al bezet is met iets anders.
+        Je oefent een doel minstens 4x voordat je kunt wisselen — dat voorkomt dat wisselen zelf een
+        makkelijke manier wordt om aan bonuspunten te komen. Net en veld zijn er maar één keer: je mag
+        daar samen met anderen hetzelfde doel oefenen, maar niet een ander doel kiezen als het net of
+        veld al bezet is met iets anders.
       </div>
 
       {mijnSpeler && (
@@ -337,17 +337,34 @@ export default function RecordboekView({
           )}
           {mijnDoelExercise && (
             <div className="cy-medium" style={{ fontSize: 11.5, color: aantalGeoefend >= 4 ? "#ff8a8a" : "#6b6b6b", marginBottom: 10 }}>
-              {aantalGeoefend}x geoefend{aantalGeoefend >= 4 ? " — tijd voor een nieuw doel!" : ""}
+              {aantalGeoefend}x geoefend{aantalGeoefend >= 4 ? " — tijd voor een nieuw doel!" : ` van de 4x — dan kun je wisselen`}
             </div>
           )}
           {!mijnDoelExercise && <div style={{ marginBottom: 10 }} />}
           <button
-            onClick={() => setKiezen((v) => !v)}
+            onClick={() => kanWisselen && setKiezen((v) => !v)}
+            disabled={!kanWisselen}
             className="cy-medium"
-            style={{ background: COLORS.yellow, color: COLORS.black, border: "none", borderRadius: 6, padding: "8px 12px", fontSize: 12.5, cursor: "pointer" }}
+            style={{
+              background: COLORS.yellow,
+              color: COLORS.black,
+              border: "none",
+              borderRadius: 6,
+              padding: "8px 12px",
+              fontSize: 12.5,
+              cursor: kanWisselen ? "pointer" : "not-allowed",
+              opacity: kanWisselen ? 1 : 0.5,
+            }}
           >
             {kiezen ? "Sluiten" : mijnDoel ? "Doel wijzigen" : "Kies je doel"}
           </button>
+          {!kanWisselen && (
+            <div className="cy-regular" style={{ fontSize: 11, color: COLORS.lightBlue, marginTop: 6, lineHeight: 1.4 }}>
+              Je kunt pas wisselen na 4x oefenen — dit voorkomt dat wisselen zelf een sluiproute naar
+              extra punten wordt. Blessure of verkeerd doel gekozen? Vraag de trainer, die kan het in
+              Beheer altijd voor je wijzigen.
+            </div>
+          )}
 
           {foutmelding && (
             <div className="cy-medium" style={{ fontSize: 11.5, color: "#ff8a8a", marginTop: 8 }}>{foutmelding}</div>

@@ -238,6 +238,10 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
             onExportBackup={data.buildBackupString}
             teamGoal={data.teamGoal}
             onSetTeamGoal={data.setTeamGoal}
+            exercises={data.exercises}
+            goals={data.goals}
+            trainings={data.trainings}
+            onSetGoal={data.setGoal}
           />
         )}
       </div>

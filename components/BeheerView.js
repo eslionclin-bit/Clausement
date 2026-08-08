@@ -2,10 +2,104 @@
 
 import { useState } from "react";
 import { COLORS } from "@/lib/constants";
+import { aantalKeerGeoefend } from "@/lib/logic";
 import { daysBetween, todayISO } from "@/lib/util";
 import { Banner, Empty, TextButton, inputStyle } from "./shared";
 
 const SEIZOEN_BEVESTIGING = "NIEUW SEIZOEN";
+
+function SpelerDoelWijzigen({ players, exercises, goals, trainings, onSetGoal }) {
+  const [playerId, setPlayerId] = useState(players[0]?.id || "");
+  const [exerciseId, setExerciseId] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [okMsg, setOkMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const speler = players.find((p) => p.id === playerId);
+  const huidigDoel = speler ? goals[speler.id] : null;
+  const aantal = speler ? aantalKeerGeoefend(trainings, speler.id, huidigDoel) : 0;
+
+  const perCategorie = {};
+  exercises.forEach((ex) => {
+    perCategorie[ex.cat] = perCategorie[ex.cat] || [];
+    perCategorie[ex.cat].push(ex);
+  });
+
+  function kiesSpeler(id) {
+    setPlayerId(id);
+    setExerciseId("");
+    setErrorMsg("");
+    setOkMsg("");
+  }
+
+  async function opslaan() {
+    if (!playerId || !exerciseId) return;
+    setErrorMsg("");
+    setOkMsg("");
+    setBusy(true);
+    const result = await onSetGoal(playerId, exerciseId);
+    setBusy(false);
+    if (!result.ok) {
+      setErrorMsg(result.message);
+      return;
+    }
+    setOkMsg("Doel gewijzigd ✓");
+    setExerciseId("");
+    setTimeout(() => setOkMsg(""), 3000);
+  }
+
+  if (players.length === 0) return null;
+
+  return (
+    <div className="scorepanel" style={{ padding: 14, marginBottom: 18 }}>
+      <div className="cy-medium" style={{ fontSize: 13, marginBottom: 4 }}>Doel van een speelster wijzigen</div>
+      <div className="cy-regular" style={{ fontSize: 11, color: COLORS.lightBlue, marginBottom: 10, lineHeight: 1.4 }}>
+        Spelers mogen zelf pas wisselen na 4x oefenen. Als trainer kun je dat altijd doorbreken — voor
+        een blessure, een verkeerd gekozen doel, of een andere goede reden.
+      </div>
+      <select value={playerId} onChange={(e) => kiesSpeler(e.target.value)} style={{ ...inputStyle, marginBottom: 8 }}>
+        {players.map((p) => (
+          <option key={p.id} value={p.id}>{p.name}</option>
+        ))}
+      </select>
+      {speler && (
+        <div className="cy-regular" style={{ fontSize: 11, color: COLORS.lightBlue, marginBottom: 8 }}>
+          Huidig doel: {huidigDoel ? `${huidigDoel.exerciseName} (${aantal}x geoefend)` : "nog niet gekozen"}
+        </div>
+      )}
+      <select value={exerciseId} onChange={(e) => setExerciseId(e.target.value)} style={{ ...inputStyle, marginBottom: 8 }}>
+        <option value="">Nieuw doel kiezen…</option>
+        {Object.entries(perCategorie).map(([cat, exs]) => (
+          <optgroup key={cat} label={cat}>
+            {exs.map((ex) => (
+              <option key={ex.id} value={ex.id}>{ex.name}</option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+      {errorMsg && <div className="cy-medium" style={{ fontSize: 11.5, color: "#ff8a8a", marginBottom: 8 }}>{errorMsg}</div>}
+      {okMsg && <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.yellow, marginBottom: 8 }}>{okMsg}</div>}
+      <button
+        onClick={opslaan}
+        disabled={busy || !exerciseId}
+        className="cy-medium"
+        style={{
+          width: "100%",
+          background: COLORS.yellow,
+          color: COLORS.black,
+          border: "none",
+          borderRadius: 6,
+          padding: "10px 8px",
+          fontSize: 13,
+          cursor: !exerciseId ? "not-allowed" : "pointer",
+          opacity: !exerciseId ? 0.5 : 1,
+        }}
+      >
+        {busy ? "Bezig…" : "Doel wijzigen"}
+      </button>
+    </div>
+  );
+}
 
 export default function BeheerView({
   players,
@@ -20,6 +114,10 @@ export default function BeheerView({
   onExportBackup,
   teamGoal,
   onSetTeamGoal,
+  exercises,
+  goals,
+  trainings,
+  onSetGoal,
 }) {
   const [naam, setNaam] = useState("");
   const [showLog, setShowLog] = useState(false);
@@ -131,6 +229,10 @@ export default function BeheerView({
             </button>
           </div>
         ))}
+      </div>
+
+      <div style={{ marginTop: 18 }}>
+        <SpelerDoelWijzigen players={players} exercises={exercises} goals={goals} trainings={trainings} onSetGoal={onSetGoal} />
       </div>
 
       <button
