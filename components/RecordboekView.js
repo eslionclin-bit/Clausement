@@ -7,6 +7,25 @@ import { addDays, todayISO } from "@/lib/util";
 import { Banner, Empty, RankBadge, TextButton, inputStyle } from "./shared";
 import RivaliteitPanel from "./RivaliteitPanel";
 
+function TeamVoortgang({ teamGoalProgress, teamGoal }) {
+  const percentage = Math.min(100, Math.round((teamGoalProgress / teamGoal) * 100));
+  return (
+    <div className="scorepanel" style={{ padding: 14, marginBottom: 14 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+        <span className="cy-medium" style={{ fontSize: 12, color: COLORS.lightBlue }}>TEAMDOEL — SAMEN</span>
+        <span className="cy-black" style={{ fontSize: 14, color: COLORS.white }}>{teamGoalProgress} / {teamGoal}</span>
+      </div>
+      <div style={{ background: "rgba(255,255,255,.15)", borderRadius: 10, height: 10, overflow: "hidden" }}>
+        <div style={{ width: `${percentage}%`, height: "100%", background: percentage >= 100 ? COLORS.yellow : COLORS.lightBlue, transition: "width .3s ease" }} />
+      </div>
+      <div className="cy-regular" style={{ fontSize: 10.5, color: COLORS.lightBlue, marginTop: 6 }}>
+        Elke poging op je doel telt hier 1 punt, en elke keer dat je je eigen record verbetert nóg 1 punt
+        extra (heel seizoen, los van de eenmalige bonus per doel-cyclus) — samen vult dat deze balk.
+      </div>
+    </div>
+  );
+}
+
 function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise, onUpdateCustomExercise, onDeleteCustomExercise }) {
   const [showOefeningen, setShowOefeningen] = useState(false);
   const [editingExerciseId, setEditingExerciseId] = useState(null);
@@ -234,6 +253,8 @@ export default function RecordboekView({
   onRespondRivalry,
   onEndRivalry,
   improvementCounts,
+  teamGoal,
+  teamGoalProgress,
   isTrainer,
 }) {
   const trend = useMemo(() => {
@@ -321,6 +342,8 @@ export default function RecordboekView({
         daar samen met anderen hetzelfde doel oefenen, maar niet een ander doel kiezen als het net of
         veld al bezet is met iets anders.
       </div>
+
+      {teamGoal && <TeamVoortgang teamGoalProgress={teamGoalProgress} teamGoal={teamGoal} />}
 
       {mijnSpeler && (
         <div className="scorepanel" style={{ padding: 12, marginBottom: 16 }}>

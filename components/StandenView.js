@@ -40,25 +40,6 @@ function PuntenUitleg() {
   );
 }
 
-function TeamVoortgang({ teamGoalProgress, teamGoal }) {
-  const percentage = Math.min(100, Math.round((teamGoalProgress / teamGoal) * 100));
-  return (
-    <div className="scorepanel" style={{ padding: 14, marginBottom: 14 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-        <span className="cy-medium" style={{ fontSize: 12, color: COLORS.lightBlue }}>TEAMDOEL — SAMEN</span>
-        <span className="cy-black" style={{ fontSize: 14, color: COLORS.white }}>{teamGoalProgress} / {teamGoal}</span>
-      </div>
-      <div style={{ background: "rgba(255,255,255,.15)", borderRadius: 10, height: 10, overflow: "hidden" }}>
-        <div style={{ width: `${percentage}%`, height: "100%", background: percentage >= 100 ? COLORS.yellow : COLORS.lightBlue, transition: "width .3s ease" }} />
-      </div>
-      <div className="cy-regular" style={{ fontSize: 10.5, color: COLORS.lightBlue, marginTop: 6 }}>
-        Elke poging op je doel telt hier 1 punt, en elke keer dat je je eigen record verbetert nóg 1 punt
-        extra (heel seizoen, los van de eenmalige bonus per doel-cyclus) — samen vult dat deze balk.
-      </div>
-    </div>
-  );
-}
-
 function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises }) {
   const openingsspelRegels = [...trainings]
     .filter((t) => t.spelers?.[player.id]?.openingsspel)
@@ -110,7 +91,7 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises }
   );
 }
 
-export default function StandenView({ players, trainings, periodStart, periodNumber, periodHistory, goals, goalHistory, exercises, teamGoal, teamGoalProgress }) {
+export default function StandenView({ players, trainings, periodStart, periodNumber, periodHistory, goals, goalHistory, exercises }) {
   const periods = [
     { label: `Huidige periode (${periodNumber})`, start: periodStart, end: null },
     ...[...periodHistory].reverse().map((p) => ({ label: `Periode ${p.number} (${p.start} t/m ${p.end})`, start: p.start, end: p.end })),
@@ -130,7 +111,6 @@ export default function StandenView({ players, trainings, periodStart, periodNum
   return (
     <div>
       <PuntenUitleg />
-      {teamGoal && <TeamVoortgang teamGoalProgress={teamGoalProgress} teamGoal={teamGoal} />}
 
       {periods.length > 1 && (
         <select value={gekozen} onChange={(e) => setGekozen(Number(e.target.value))} style={{ ...inputStyle, marginBottom: 10 }}>

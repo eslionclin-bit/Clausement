@@ -181,8 +181,6 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
             goals={data.goals}
             goalHistory={data.goalHistory}
             exercises={data.exercises}
-            teamGoal={data.teamGoal}
-            teamGoalProgress={data.teamGoalProgress}
           />
         )}
         {activeView === "recordboek" && (
@@ -206,6 +204,8 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
             onRespondRivalry={data.respondRivalry}
             onEndRivalry={data.endRivalry}
             improvementCounts={data.improvementCounts}
+            teamGoal={data.teamGoal}
+            teamGoalProgress={data.teamGoalProgress}
             isTrainer={isTrainer}
           />
         )}
