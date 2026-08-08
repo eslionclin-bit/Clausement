@@ -101,8 +101,8 @@ export function GlobalStyle() {
         transform-origin: center;
       }
       @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(6px); }
-        to { opacity: 1; transform: translateY(0); }
+        from { opacity: 0; }
+        to { opacity: 1; }
       }
       .fade-in {
         animation: fadeInUp .4s ease both;
