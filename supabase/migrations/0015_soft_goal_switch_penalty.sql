@@ -12,6 +12,8 @@
 -- rekent dan vanzelf verder vanaf het record van vóór deze cyclus, net
 -- zoals bij het repareren van een verwijderde training.
 
+drop function if exists public.set_goal(uuid, text);
+
 create or replace function public.set_goal(p_player_id uuid, p_exercise_id text)
 returns jsonb
 language plpgsql
