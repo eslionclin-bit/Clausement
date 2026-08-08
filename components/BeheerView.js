@@ -198,8 +198,9 @@ export default function BeheerView({
       <div className="scorepanel" style={{ padding: 14, marginBottom: 18 }}>
         <div className="cy-medium" style={{ fontSize: 13, marginBottom: 6 }}>Teamdoel</div>
         <div className="cy-regular" style={{ fontSize: 11, color: COLORS.lightBlue, marginBottom: 8, lineHeight: 1.4 }}>
-          Een gezamenlijk mijlpaal: de som van ieders Recordboek-totaal. Iedereen werkt aan haar eigen
-          verbetering, en draagt daarmee bij aan iets groters. Leeg laten = geen teamdoel tonen.
+          Een gezamenlijk mijlpaal: elke keer dat iemand haar eigen record verbetert, telt hier 1 punt
+          mee (heel seizoen). Iedereen werkt aan haar eigen verbetering, en draagt daarmee bij aan iets
+          groters. Leeg laten = geen teamdoel tonen.
         </div>
         <input
           type="number"

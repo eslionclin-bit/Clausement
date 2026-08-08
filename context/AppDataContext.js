@@ -60,6 +60,7 @@ export function AppDataProvider({ children }) {
   const [teamGoal, setTeamGoalState] = useState(null);
   const [auditLog, setAuditLog] = useState([]);
   const [rivalries, setRivalries] = useState([]);
+  const [improvementCounts, setImprovementCounts] = useState({});
   const [saving, setSaving] = useState(false);
 
   const refreshTimer = useRef(null);
@@ -83,6 +84,7 @@ export function AppDataProvider({ children }) {
         teamGoalRes,
         auditRes,
         rivalriesRes,
+        improvementCountsRes,
       ] = await Promise.all([
         supabase.from("players").select("*").order("name"),
         supabase.from("trainings").select("*, training_scores(*)"),
@@ -95,6 +97,7 @@ export function AppDataProvider({ children }) {
         supabase.from("team_goal").select("*").maybeSingle(),
         isTrainer ? supabase.from("audit_log").select("*").order("at") : Promise.resolve({ data: [], error: null }),
         supabase.from("rivalries").select("*"),
+        supabase.from("player_improvement_counts").select("*"),
       ]);
 
       const firstError = [
@@ -109,6 +112,7 @@ export function AppDataProvider({ children }) {
         teamGoalRes,
         auditRes,
         rivalriesRes,
+        improvementCountsRes,
       ].find((r) => r.error);
       if (firstError) throw firstError.error;
 
@@ -176,6 +180,11 @@ export function AppDataProvider({ children }) {
           acceptedAt: r.accepted_at,
         }))
       );
+      const improvementMap = {};
+      (improvementCountsRes.data || []).forEach((i) => {
+        improvementMap[i.player_id] = i.count;
+      });
+      setImprovementCounts(improvementMap);
       setAuditLog(
         (auditRes.data || []).map((l) => ({
           id: l.id,
@@ -225,6 +234,10 @@ export function AppDataProvider({ children }) {
 
   const allExercises = exercises;
   const customExercises = useMemo(() => exercises.filter((e) => e.isCustom), [exercises]);
+  const teamImprovements = useMemo(
+    () => Object.values(improvementCounts).reduce((som, c) => som + c, 0),
+    [improvementCounts]
+  );
 
   const recordboek = useMemo(() => {
     const totals = {};
@@ -409,6 +422,8 @@ export function AppDataProvider({ children }) {
     teamGoal,
     auditLog,
     rivalries,
+    improvementCounts,
+    teamImprovements,
     recordboek,
     saving,
     refresh: load,

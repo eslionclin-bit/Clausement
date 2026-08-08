@@ -40,20 +40,20 @@ function PuntenUitleg() {
   );
 }
 
-function TeamVoortgang({ recordboek, teamGoal }) {
-  const totaal = recordboek.reduce((som, r) => som + r.totaal, 0);
-  const percentage = Math.min(100, Math.round((totaal / teamGoal) * 100));
+function TeamVoortgang({ teamImprovements, teamGoal }) {
+  const percentage = Math.min(100, Math.round((teamImprovements / teamGoal) * 100));
   return (
     <div className="scorepanel" style={{ padding: 14, marginBottom: 14 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
         <span className="cy-medium" style={{ fontSize: 12, color: COLORS.lightBlue }}>TEAMDOEL — SAMEN</span>
-        <span className="cy-black" style={{ fontSize: 14, color: COLORS.white }}>{totaal} / {teamGoal}</span>
+        <span className="cy-black" style={{ fontSize: 14, color: COLORS.white }}>{teamImprovements} / {teamGoal}</span>
       </div>
       <div style={{ background: "rgba(255,255,255,.15)", borderRadius: 10, height: 10, overflow: "hidden" }}>
         <div style={{ width: `${percentage}%`, height: "100%", background: percentage >= 100 ? COLORS.yellow : COLORS.lightBlue, transition: "width .3s ease" }} />
       </div>
       <div className="cy-regular" style={{ fontSize: 10.5, color: COLORS.lightBlue, marginTop: 6 }}>
-        Som van ieders Recordboek-totaal (heel seizoen) — jij werkt aan je eigen verbetering, en telt daarmee mee voor het team.
+        Elke keer dat iemand haar eigen record verbetert (heel seizoen) telt hier mee — jij werkt aan je
+        eigen verbetering, en telt daarmee mee voor het team.
       </div>
     </div>
   );
@@ -110,7 +110,7 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises }
   );
 }
 
-export default function StandenView({ players, trainings, periodStart, periodNumber, periodHistory, goals, goalHistory, exercises, teamGoal, recordboek }) {
+export default function StandenView({ players, trainings, periodStart, periodNumber, periodHistory, goals, goalHistory, exercises, teamGoal, teamImprovements }) {
   const periods = [
     { label: `Huidige periode (${periodNumber})`, start: periodStart, end: null },
     ...[...periodHistory].reverse().map((p) => ({ label: `Periode ${p.number} (${p.start} t/m ${p.end})`, start: p.start, end: p.end })),
@@ -130,7 +130,7 @@ export default function StandenView({ players, trainings, periodStart, periodNum
   return (
     <div>
       <PuntenUitleg />
-      {teamGoal && <TeamVoortgang recordboek={recordboek} teamGoal={teamGoal} />}
+      {teamGoal && <TeamVoortgang teamImprovements={teamImprovements} teamGoal={teamGoal} />}
 
       {periods.length > 1 && (
         <select value={gekozen} onChange={(e) => setGekozen(Number(e.target.value))} style={{ ...inputStyle, marginBottom: 10 }}>

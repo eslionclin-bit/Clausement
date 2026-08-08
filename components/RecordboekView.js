@@ -233,6 +233,7 @@ export default function RecordboekView({
   onProposeRivalry,
   onRespondRivalry,
   onEndRivalry,
+  improvementCounts,
   isTrainer,
 }) {
   const trend = useMemo(() => {
@@ -481,6 +482,14 @@ export default function RecordboekView({
                   )}
                 </div>
                 {doel && <div className="cy-regular" style={{ fontSize: 10.5, color: "#6b6b6b" }}>doel: {doel.exerciseName}</div>}
+                {(() => {
+                  const aantal = improvementCounts[r.player.id] || 0;
+                  return (
+                    <div className="cy-regular" style={{ fontSize: 10.5, color: "#6b6b6b" }}>
+                      {aantal} verbetering{aantal === 1 ? "" : "en"} dit seizoen
+                    </div>
+                  );
+                })()}
               </div>
               <div className="tile-num" style={{ fontSize: 20, color: COLORS.lightBlue }}>{r.totaal}</div>
             </div>
