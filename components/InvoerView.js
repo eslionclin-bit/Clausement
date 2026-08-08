@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { COLORS } from "@/lib/constants";
 import { previewDoelPunten } from "@/lib/logic";
-import { todayISO } from "@/lib/util";
+import { daysBetween, todayISO } from "@/lib/util";
 import { Banner, Empty, Field, MiniNum, TextButton, inputStyle, usePrefersReducedMotion } from "./shared";
 import { SaveBallIcon, StrikeCelebration } from "./BowlingAnimations";
 
@@ -15,12 +15,15 @@ export default function InvoerView({ players, trainings, myName, goals, personal
     return mijnSpeler ? new Set([mijnSpeler.id]) : new Set();
   }
 
-  // Spelers mogen een bestaande training alleen op de invoerdag zelf nog
-  // wijzigen/verwijderen; de trainer altijd. Wordt ook server-side afgedwongen
-  // (submit_training/delete_training) — dit is puur om vooraf een duidelijke
-  // read-only weergave te tonen i.p.v. pas bij het opslaan te weigeren.
+  // Spelers mogen een bestaande training nog wijzigen/verwijderen tot en met
+  // de dag ná de invoerdag zelf (dus vandaag of gisteren ingevoerd); de
+  // trainer altijd. Wordt ook server-side afgedwongen (submit_training/
+  // delete_training) — dit is puur om vooraf een duidelijke read-only
+  // weergave te tonen i.p.v. pas bij het opslaan te weigeren.
   function binnenBewerkVenster(training) {
-    return isTrainer || (training?.enteredAt && training.enteredAt.slice(0, 10) === todayISO());
+    if (isTrainer) return true;
+    if (!training?.enteredAt) return false;
+    return daysBetween(training.enteredAt.slice(0, 10), todayISO()) <= 1;
   }
 
   const [editingId, setEditingId] = useState(null);
