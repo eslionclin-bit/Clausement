@@ -182,7 +182,7 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
             goalHistory={data.goalHistory}
             exercises={data.exercises}
             teamGoal={data.teamGoal}
-            teamImprovements={data.teamImprovements}
+            teamGoalProgress={data.teamGoalProgress}
           />
         )}
         {activeView === "recordboek" && (
