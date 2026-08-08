@@ -183,14 +183,14 @@ export default function InvoerView({ players, trainings, myName, goals, personal
     if (!reducedMotion) {
       if (result.anyRecord) {
         setShowStrike(true);
-        setTimeout(() => setShowStrike(false), 2000);
+        setTimeout(() => setShowStrike(false), 2800);
       } else {
         setShowSaveBounce(true);
-        setTimeout(() => setShowSaveBounce(false), 900);
+        setTimeout(() => setShowSaveBounce(false), 1600);
       }
     }
     cancelEdit();
-    setTimeout(() => setSavedMsg(""), 2500);
+    setTimeout(() => setSavedMsg(""), result.anyRecord && !reducedMotion ? 3200 : 2500);
   }
 
   async function handleDelete(id) {
