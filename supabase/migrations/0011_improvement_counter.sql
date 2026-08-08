@@ -16,9 +16,10 @@ create policy "player_improvement_counts_select" on player_improvement_counts
   for select to authenticated using (true);
 
 -- ---------------------------------------------------------------
--- submit_training: zelfde logica als voorheen (0005_no_future_dates.sql),
--- met één toevoeging in de "verbeterd"-tak — ophogen ongeacht of de
--- cyclus-bonus die keer al gebruikt was.
+-- submit_training: zelfde logica als voorheen (0010_edit_window_two_days.sql,
+-- de meest recente versie — inclusief het 2-daagse bewerk-venster), met één
+-- toevoeging in de "verbeterd"-tak — ophogen ongeacht of de cyclus-bonus
+-- die keer al gebruikt was.
 -- ---------------------------------------------------------------
 create or replace function public.submit_training(p_date date, p_entries jsonb, p_actor text)
 returns jsonb
@@ -60,7 +61,7 @@ begin
       returning id into v_training_id;
     v_action := 'aangemaakt';
   else
-    if not is_trainer() and v_entered_at::date <> current_date then
+    if not is_trainer() and current_date - v_entered_at::date > 1 then
       raise exception 'Deze training kan niet meer gewijzigd worden door een speler — vraag de trainer.';
     end if;
 
