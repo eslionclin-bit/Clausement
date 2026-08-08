@@ -304,10 +304,10 @@ export function AppDataProvider({ children }) {
   }
 
   async function setGoal(playerId, exerciseId) {
-    const { error: err } = await supabase.rpc("set_goal", { p_player_id: playerId, p_exercise_id: exerciseId });
+    const { data, error: err } = await supabase.rpc("set_goal", { p_player_id: playerId, p_exercise_id: exerciseId });
     if (err) return { ok: false, message: err.message };
     await load();
-    return { ok: true };
+    return { ok: true, vervallen: Boolean(data?.vervallen) };
   }
 
   async function addCustomExercise(exercise) {

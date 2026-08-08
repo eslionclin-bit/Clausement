@@ -54,8 +54,9 @@ function SpelerDoelWijzigen({ players, exercises, goals, trainings, onSetGoal })
     <div className="scorepanel" style={{ padding: 14, marginBottom: 18 }}>
       <div className="cy-medium" style={{ fontSize: 13, marginBottom: 4 }}>Doel van een speelster wijzigen</div>
       <div className="cy-regular" style={{ fontSize: 11, color: COLORS.lightBlue, marginBottom: 10, lineHeight: 1.4 }}>
-        Spelers mogen zelf pas wisselen na 4x oefenen. Als trainer kun je dat altijd doorbreken — voor
-        een blessure, een verkeerd gekozen doel, of een andere goede reden.
+        Spelers mogen altijd zelf wisselen, maar wisselen ze vóór 4x oefenen, dan vervallen hun scores
+        en record van dat doel automatisch. Wijzig je het hier als trainer, dan vervalt er nooit iets —
+        handig bij een blessure, een verkeerd gekozen doel, of een andere goede reden.
       </div>
       <select value={playerId} onChange={(e) => kiesSpeler(e.target.value)} style={{ ...inputStyle, marginBottom: 8 }}>
         {players.map((p) => (
