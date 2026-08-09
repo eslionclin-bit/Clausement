@@ -277,6 +277,10 @@ export default function RecordboekView({
     if (!mijnSpeler) return [];
     return doelGeschiedenisVoorSpeler(trainings, mijnSpeler.id, goalHistory[mijnSpeler.id] || [], mijnDoel, exercises);
   }, [goalHistory, mijnDoel, mijnSpeler, trainings, exercises]);
+  const mijnVoltooideDoelen = useMemo(
+    () => mijnGeschiedenis.filter((h) => !h.actief && h.aantal >= 4),
+    [mijnGeschiedenis]
+  );
   const [kiezen, setKiezen] = useState(false);
   const [zoek, setZoek] = useState("");
   const [foutmelding, setFoutmelding] = useState("");
@@ -463,18 +467,15 @@ export default function RecordboekView({
         onEndRivalry={onEndRivalry}
       />
 
-      {mijnSpeler && mijnGeschiedenis.length > 0 && (
+      {mijnSpeler && mijnVoltooideDoelen.length > 0 && (
         <div style={{ marginBottom: 18 }}>
           <div className="cy-medium" style={{ fontSize: 13, color: COLORS.blue, marginBottom: 8 }}>MIJN VOLTOOIDE DOELEN</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {[...mijnGeschiedenis].reverse().map((h, i) => (
-              <div key={i} style={{ background: COLORS.white, borderRadius: 6, padding: "8px 10px", borderLeft: h.actief ? `3px solid ${COLORS.yellow}` : "3px solid transparent" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <span className="cy-medium" style={{ fontSize: 13 }}>{h.assignment.exerciseName}</span>
-                  {h.actief && <span className="cy-medium" style={{ fontSize: 9.5, color: COLORS.blue }}>huidig</span>}
-                </div>
+            {[...mijnVoltooideDoelen].reverse().map((h, i) => (
+              <div key={i} style={{ background: COLORS.white, borderRadius: 6, padding: "8px 10px" }}>
+                <div className="cy-medium" style={{ fontSize: 13 }}>{h.assignment.exerciseName}</div>
                 <div className="cy-regular" style={{ fontSize: 10.5, color: "#6b6b6b" }}>
-                  vanaf {h.assignment.chosenAt}{h.eindDatum ? ` t/m ${h.eindDatum}` : " · nog bezig"}
+                  vanaf {h.assignment.chosenAt} t/m {h.eindDatum}
                 </div>
                 <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginTop: 2 }}>
                   {h.beste !== null ? `Beste score: ${h.beste}${h.ex ? ` — ${h.ex.metric}` : ""}` : "Nog geen score ingevoerd"}
