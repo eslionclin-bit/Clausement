@@ -328,7 +328,7 @@ export default function RecordboekView({
   }
 
   async function kiesDoel(ex) {
-    if (vol(ex) || herhaling(ex)) return;
+    if (herhaling(ex)) return;
     if (mijnDoel && aantalGeoefend > 0 && aantalGeoefend < 4) {
       const bevestigd = confirm(
         `Je hebt "${mijnDoel.exerciseName}" nog geen 4x geoefend. Als je nu wisselt, vervallen je scores en je record van dit doel. Doorgaan?`
@@ -355,9 +355,9 @@ export default function RecordboekView({
       <div className="cy-regular" style={{ fontSize: 12, color: "#666", marginBottom: 14, lineHeight: 1.5 }}>
         Het Recordboek reset nooit — dit zijn de doel-punten van elke speelster over het hele seizoen.
         Je kunt altijd van doel wisselen, maar wissel je vóór 4x oefenen, dan vervallen je scores en je
-        record van het huidige doel. Net en veld zijn er maar één keer: je mag daar samen met anderen
-        hetzelfde doel oefenen, maar niet een ander doel kiezen als het net of veld al bezet is met iets
-        anders.
+        record van het huidige doel. Net en veld zijn schaars: als iemand anders daar al met een ander
+        doel oefent, kun je nog steeds je eigen doel kiezen — plan dan onderling wie wanneer aan de beurt
+        is.
       </div>
 
       {teamGoal && <TeamVoortgang teamGoalProgress={teamGoalProgress} teamGoal={teamGoal} />}
@@ -410,6 +410,10 @@ export default function RecordboekView({
                 onChange={(e) => setZoek(e.target.value)}
                 style={{ ...inputStyle, marginBottom: 8 }}
               />
+              <div className="cy-regular" style={{ fontSize: 10.5, color: COLORS.lightBlue, marginBottom: 8, lineHeight: 1.4 }}>
+                Let op: iemand anders gebruikt dit station ook — plan samen wie wanneer aan de beurt is
+                (bijvoorbeeld in aparte tijdblokjes).
+              </div>
               <div style={{ maxHeight: 320, overflowY: "auto" }}>
                 {Object.entries(perCategorie).map(([cat, exs]) => (
                   <div key={cat} style={{ marginBottom: 8 }}>
@@ -417,18 +421,17 @@ export default function RecordboekView({
                     {exs.map((ex) => {
                       const isVol = vol(ex);
                       const isHerhaling = herhaling(ex);
-                      const geblokkeerd = isVol || isHerhaling;
                       return (
                         <div
                           key={ex.id}
                           onClick={() => kiesDoel(ex)}
                           style={{
                             padding: "7px 8px",
-                            background: geblokkeerd ? "rgba(255,255,255,.03)" : "rgba(255,255,255,.08)",
+                            background: isHerhaling ? "rgba(255,255,255,.03)" : "rgba(255,255,255,.08)",
                             borderRadius: 4,
                             marginBottom: 3,
-                            cursor: geblokkeerd ? "not-allowed" : "pointer",
-                            opacity: geblokkeerd ? 0.5 : 1,
+                            cursor: isHerhaling ? "not-allowed" : "pointer",
+                            opacity: isHerhaling ? 0.5 : 1,
                           }}
                         >
                           <div className="cy-medium" style={{ fontSize: 12.5, color: COLORS.white, display: "flex", justifyContent: "space-between", gap: 6 }}>
@@ -436,7 +439,7 @@ export default function RecordboekView({
                             {isHerhaling ? (
                               <span style={{ color: "#ff8a8a", fontSize: 10, flexShrink: 0 }}>dit is je huidige doel</span>
                             ) : isVol ? (
-                              <span style={{ color: "#ff8a8a", fontSize: 10, flexShrink: 0 }}>
+                              <span style={{ color: COLORS.yellow, fontSize: 10, flexShrink: 0 }}>
                                 {ex.station} bezet: {bezetPerStation[ex.station]?.exerciseName}
                               </span>
                             ) : (
