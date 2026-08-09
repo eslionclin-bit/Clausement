@@ -26,7 +26,7 @@ function TeamVoortgang({ teamGoalProgress, teamGoal }) {
   );
 }
 
-function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise, onUpdateCustomExercise, onDeleteCustomExercise }) {
+function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise, onUpdateCustomExercise, onDeleteCustomExercise, isTrainer }) {
   const [showOefeningen, setShowOefeningen] = useState(false);
   const [editingExerciseId, setEditingExerciseId] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
@@ -73,7 +73,7 @@ function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise
           <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 10, lineHeight: 1.5 }}>
             De basisoefeningen uit het Handboek staan vast. Hier voeg je eigen extra oefeningen toe —
             handig voor een individueel accent dat nog niet in de lijst staat. Eigen oefeningen kun je
-            later altijd nog wijzigen of verwijderen — door wie dan ook in het team.
+            later altijd nog wijzigen — door wie dan ook in het team. Verwijderen kan alleen de trainer.
           </div>
 
           <div style={{ background: COLORS.white, borderRadius: 6, padding: 10, marginBottom: 12 }}>
@@ -140,17 +140,19 @@ function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise
                 </div>
                 <div style={{ display: "flex", gap: 10 }}>
                   <TextButton onClick={() => startEditOefening(ex)} style={{ fontSize: 12, color: COLORS.blue }}>wijzigen</TextButton>
-                  <TextButton
-                    onClick={async () => {
-                      if (confirm(`"${ex.name}" verwijderen?`)) {
-                        const result = await onDeleteCustomExercise(ex.id);
-                        if (!result.ok) setErrorMsg(result.message);
-                      }
-                    }}
-                    style={{ fontSize: 12, color: "#c0392b" }}
-                  >
-                    verwijderen
-                  </TextButton>
+                  {isTrainer && (
+                    <TextButton
+                      onClick={async () => {
+                        if (confirm(`"${ex.name}" verwijderen?`)) {
+                          const result = await onDeleteCustomExercise(ex.id);
+                          if (!result.ok) setErrorMsg(result.message);
+                        }
+                      }}
+                      style={{ fontSize: 12, color: "#c0392b" }}
+                    >
+                      verwijderen
+                    </TextButton>
+                  )}
                 </div>
               </div>
             ))}
@@ -529,6 +531,7 @@ export default function RecordboekView({
         onAddCustomExercise={onAddCustomExercise}
         onUpdateCustomExercise={onUpdateCustomExercise}
         onDeleteCustomExercise={onDeleteCustomExercise}
+        isTrainer={isTrainer}
       />
 
       {isTrainer && <PerOefeningRanglijst players={players} exercises={exercises} personalRecords={personalRecords} />}
