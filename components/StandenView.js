@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { COLORS } from "@/lib/constants";
-import { computeStandings, doelGeschiedenisVoorSpeler } from "@/lib/logic";
+import { computeStandings, doelGeschiedenisVoorSpeler, doelRegelsVoorPeriode } from "@/lib/logic";
 import { daysBetween, todayISO } from "@/lib/util";
 import { Empty, RankBadge, inputStyle } from "./shared";
 
@@ -40,13 +40,24 @@ function PuntenUitleg() {
   );
 }
 
-function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises }) {
+function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises, periodStart, periodEnd }) {
+  const inPeriode = (t) => t.date >= periodStart && (!periodEnd || t.date < periodEnd);
+
   const openingsspelRegels = [...trainings]
-    .filter((t) => t.spelers?.[player.id]?.openingsspel)
+    .filter((t) => t.spelers?.[player.id]?.openingsspel && inPeriode(t))
     .sort((a, b) => (a.date < b.date ? 1 : -1));
   const wedstrijdRegels = [...trainings]
-    .filter((t) => t.spelers?.[player.id]?.wedstrijd)
+    .filter((t) => t.spelers?.[player.id]?.wedstrijd && inPeriode(t))
     .sort((a, b) => (a.date < b.date ? 1 : -1));
+  const doelRegelsPeriode = doelRegelsVoorPeriode(
+    trainings,
+    player.id,
+    periodStart,
+    periodEnd,
+    goalHistory[player.id] || [],
+    goals[player.id] || null,
+    exercises
+  );
   const doelGeschiedenis = doelGeschiedenisVoorSpeler(
     trainings,
     player.id,
@@ -59,7 +70,7 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises }
     <div style={{ background: "#f7f7fb", borderRadius: "0 0 8px 8px", padding: "10px 12px", marginBottom: 4 }}>
       <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginBottom: 4 }}>OPENINGSSPEL</div>
       {openingsspelRegels.length === 0 && (
-        <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 8 }}>Nog geen scores.</div>
+        <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 8 }}>Nog geen scores in deze periode.</div>
       )}
       {openingsspelRegels.map((t) => (
         <div key={t.id} className="cy-regular" style={{ fontSize: 11, color: "#555" }}>
@@ -67,7 +78,17 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises }
         </div>
       ))}
 
-      <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginTop: 10, marginBottom: 4 }}>DOEL</div>
+      <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginTop: 10, marginBottom: 4 }}>DOEL — SCORES DEZE PERIODE</div>
+      {doelRegelsPeriode.length === 0 && (
+        <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 8 }}>Nog geen doel-scores in deze periode.</div>
+      )}
+      {doelRegelsPeriode.map((r, i) => (
+        <div key={i} className="cy-regular" style={{ fontSize: 11, color: "#555" }}>
+          {r.date}: {r.doelRaw}{r.metric ? ` ${r.metric}` : ""}{r.exerciseName ? ` (${r.exerciseName})` : ""} → {r.doel} punt{r.doel === 1 ? "" : "en"}
+        </div>
+      ))}
+
+      <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginTop: 10, marginBottom: 4 }}>DOEL — TOEWIJZINGEN (heel seizoen)</div>
       {doelGeschiedenis.length === 0 && (
         <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 8 }}>Nog geen doel gekozen.</div>
       )}
@@ -80,7 +101,7 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises }
 
       <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginTop: 10, marginBottom: 4 }}>WEDSTRIJD</div>
       {wedstrijdRegels.length === 0 && (
-        <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b" }}>Nog geen wedstrijden.</div>
+        <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b" }}>Nog geen wedstrijden in deze periode.</div>
       )}
       {wedstrijdRegels.map((t) => (
         <div key={t.id} className="cy-regular" style={{ fontSize: 11, color: "#555" }}>
@@ -166,7 +187,15 @@ export default function StandenView({ players, trainings, periodStart, periodNum
                 <span style={{ color: "#bbb", fontSize: 11 }}>{open ? "▾" : "▸"}</span>
               </div>
               {open && (
-                <SpelerGeschiedenis player={r.player} trainings={trainings} goals={goals} goalHistory={goalHistory} exercises={exercises} />
+                <SpelerGeschiedenis
+                  player={r.player}
+                  trainings={trainings}
+                  goals={goals}
+                  goalHistory={goalHistory}
+                  exercises={exercises}
+                  periodStart={actief.start}
+                  periodEnd={actief.end}
+                />
               )}
             </div>
           );
