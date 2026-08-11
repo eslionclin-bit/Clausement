@@ -16,6 +16,8 @@ function reshapeTrainings(rows) {
         doel: s.doel,
         doelRaw: s.doel_raw === null || s.doel_raw === undefined ? "" : String(s.doel_raw),
         wedstrijd: s.wedstrijd || "",
+        assignmentId: s.assignment_id || null,
+        exerciseId: s.exercise_id || null,
       };
     });
     return {

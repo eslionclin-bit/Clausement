@@ -50,16 +50,6 @@ export function GlobalStyle() {
       .strike-badge {
         animation: strikePop 1.6s ease .75s both;
       }
-      @keyframes ballRollShort {
-        0% { transform: translateX(-26px) rotate(0deg); opacity: 0; }
-        15% { opacity: 1; }
-        100% { transform: translateX(0) rotate(260deg); opacity: 1; }
-      }
-      .save-ball {
-        animation: ballRollShort 1.1s cubic-bezier(.34,1.2,.64,1) both;
-        transform-box: fill-box;
-        transform-origin: center;
-      }
       @keyframes strikeBallRoll {
         0% { transform: translateX(-110px) rotate(0deg); opacity: 0; }
         7% { opacity: 1; }
@@ -108,7 +98,7 @@ export function GlobalStyle() {
         animation: fadeInUp .4s ease both;
       }
       @media (prefers-reduced-motion: reduce) {
-        .strike-badge, .save-ball, .strike-ball, .strike-pin-a, .strike-pin-b, .strike-pin-c, .strike-pin-d, .loading-ball, .fade-in {
+        .strike-badge, .strike-ball, .strike-pin-a, .strike-pin-b, .strike-pin-c, .strike-pin-d, .loading-ball, .fade-in {
           animation: none !important;
         }
       }

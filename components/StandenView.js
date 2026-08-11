@@ -49,15 +49,7 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises, 
   const wedstrijdRegels = [...trainings]
     .filter((t) => t.spelers?.[player.id]?.wedstrijd && inPeriode(t))
     .sort((a, b) => (a.date < b.date ? 1 : -1));
-  const doelRegelsPeriode = doelRegelsVoorPeriode(
-    trainings,
-    player.id,
-    periodStart,
-    periodEnd,
-    goalHistory[player.id] || [],
-    goals[player.id] || null,
-    exercises
-  );
+  const doelRegelsPeriode = doelRegelsVoorPeriode(trainings, player.id, periodStart, periodEnd, exercises);
   const doelGeschiedenis = doelGeschiedenisVoorSpeler(
     trainings,
     player.id,

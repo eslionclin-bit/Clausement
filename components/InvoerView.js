@@ -5,7 +5,7 @@ import { COLORS } from "@/lib/constants";
 import { previewDoelPunten } from "@/lib/logic";
 import { daysBetween, todayISO } from "@/lib/util";
 import { Banner, Empty, Field, MiniNum, TextButton, inputStyle, usePrefersReducedMotion } from "./shared";
-import { SaveBallIcon, StrikeCelebration } from "./BowlingAnimations";
+import { StrikeCelebration } from "./BowlingAnimations";
 
 export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving, isTrainer, jumpToDate, onDirtyChange }) {
   const emptyRows = () => Object.fromEntries(players.map((p) => [p.id, { openingsspel: 0, doel: 0, doelRaw: "", wedstrijd: "" }]));
@@ -33,7 +33,6 @@ export default function InvoerView({ players, trainings, myName, goals, personal
   const [savedMsg, setSavedMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [showStrike, setShowStrike] = useState(false);
-  const [showSaveBounce, setShowSaveBounce] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
   const [showHistorie, setShowHistorie] = useState(false);
   const [openMonths, setOpenMonths] = useState(() => new Set([todayISO().slice(0, 7)]));
@@ -181,16 +180,11 @@ export default function InvoerView({ players, trainings, myName, goals, personal
     const basis = editingId ? "Training bijgewerkt" : "Training opgeslagen";
     setSavedMsg(result.anyRecord ? `${basis} — nieuw record! 🏆 ✓` : `${basis} ✓`);
     if (!reducedMotion) {
-      if (result.anyRecord) {
-        setShowStrike(true);
-        setTimeout(() => setShowStrike(false), 2800);
-      } else {
-        setShowSaveBounce(true);
-        setTimeout(() => setShowSaveBounce(false), 1600);
-      }
+      setShowStrike(true);
+      setTimeout(() => setShowStrike(false), 2800);
     }
     cancelEdit();
-    setTimeout(() => setSavedMsg(""), result.anyRecord && !reducedMotion ? 3200 : 2500);
+    setTimeout(() => setSavedMsg(""), !reducedMotion ? 3200 : 2500);
   }
 
   async function handleDelete(id) {
@@ -216,7 +210,6 @@ export default function InvoerView({ players, trainings, myName, goals, personal
           </button>
           {savedMsg && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 6 }}>
-              {showSaveBounce && <SaveBallIcon />}
               <div className="cy-medium" style={{ color: COLORS.blue, fontSize: 13 }}>{savedMsg}</div>
             </div>
           )}

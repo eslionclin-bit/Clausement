@@ -1,12 +1,11 @@
 "use client";
 
-// Lichtgewicht bal/kegel-graphics voor drie momenten: elke score-opslag
-// (klein, rustig), een nieuw persoonlijk record (groter, uitbundiger — de
-// bestaande STRIKE!) en het laadscherm (doorlopende lus). Puur CSS-animatie
-// op een paar SVG-vormen, geen canvas/afbeeldingen nodig. Componenten die
-// deze renderen zijn zelf verantwoordelijk voor het niet-mounten ervan onder
-// prefers-reduced-motion (zie usePrefersReducedMotion in shared.js) — hier
-// zit alleen de teken- en animatielaag.
+// Lichtgewicht bal/kegel-graphics voor twee momenten: elke geslaagde
+// score-opslag (groot, uitbundig — STRIKE!) en het laadscherm (doorlopende
+// lus). Puur CSS-animatie op een paar SVG-vormen, geen canvas/afbeeldingen
+// nodig. Componenten die deze renderen zijn zelf verantwoordelijk voor het
+// niet-mounten ervan onder prefers-reduced-motion (zie usePrefersReducedMotion
+// in shared.js) — hier zit alleen de teken- en animatielaag.
 
 import { COLORS } from "@/lib/constants";
 
@@ -32,18 +31,7 @@ function Pin({ x, y, className, stripe = COLORS.yellow }) {
   );
 }
 
-// Bij elke geslaagde score-opslag — klein, rustig, ~0.7s.
-export function SaveBallIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" style={{ overflow: "visible", flexShrink: 0 }}>
-      <g className="save-ball">
-        <Ball cx={8} cy={8} r={7} />
-      </g>
-    </svg>
-  );
-}
-
-// Bij een nieuw persoonlijk record — bal rolt door, kegels vallen om, STRIKE!
+// Bij elke geslaagde score-opslag — bal rolt door, kegels vallen om, STRIKE!
 export function StrikeCelebration() {
   return (
     <div
