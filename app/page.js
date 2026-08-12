@@ -240,6 +240,11 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
             teamGoal={data.teamGoal}
             onSetTeamGoal={data.setTeamGoal}
             exercises={data.exercises}
+            customExercises={data.customExercises}
+            onAddCustomExercise={data.addCustomExercise}
+            onUpdateCustomExercise={data.updateCustomExercise}
+            onDeleteCustomExercise={data.deleteCustomExercise}
+            myName={myName}
             goals={data.goals}
             trainings={data.trainings}
             onSetGoal={data.setGoal}

@@ -5,6 +5,7 @@ import { COLORS } from "@/lib/constants";
 import { aantalKeerGeoefend } from "@/lib/logic";
 import { daysBetween, todayISO } from "@/lib/util";
 import { Banner, Empty, TextButton, inputStyle } from "./shared";
+import EigenOefeningenBeheer from "./EigenOefeningenBeheer";
 
 const SEIZOEN_BEVESTIGING = "NIEUW SEIZOEN";
 
@@ -116,6 +117,11 @@ export default function BeheerView({
   teamGoal,
   onSetTeamGoal,
   exercises,
+  customExercises,
+  onAddCustomExercise,
+  onUpdateCustomExercise,
+  onDeleteCustomExercise,
+  myName,
   goals,
   trainings,
   onSetGoal,
@@ -295,6 +301,17 @@ export default function BeheerView({
       <div style={{ marginTop: 18 }}>
         <SpelerDoelWijzigen players={players} exercises={exercises} goals={goals} trainings={trainings} onSetGoal={onSetGoal} />
       </div>
+
+      <EigenOefeningenBeheer
+        exercises={exercises}
+        customExercises={customExercises}
+        onAddCustomExercise={onAddCustomExercise}
+        onUpdateCustomExercise={onUpdateCustomExercise}
+        onDeleteCustomExercise={onDeleteCustomExercise}
+        myName={myName}
+        isTrainer={true}
+        dark={false}
+      />
 
       <button
         onClick={() => setShowBackup((v) => !v)}
