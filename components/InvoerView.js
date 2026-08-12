@@ -183,10 +183,10 @@ export default function InvoerView({ players, trainings, myName, goals, personal
     if (!reducedMotion) {
       setStrikeVariant((v) => (v + 1) % strikeVariantCount());
       setShowStrike(true);
-      setTimeout(() => setShowStrike(false), 2600);
+      setTimeout(() => setShowStrike(false), 2800);
     }
     cancelEdit();
-    setTimeout(() => setSavedMsg(""), !reducedMotion ? 3000 : 2500);
+    setTimeout(() => setSavedMsg(""), !reducedMotion ? 3200 : 2500);
   }
 
   async function handleDelete(id) {

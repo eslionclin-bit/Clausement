@@ -26,9 +26,18 @@ function Ball({ cx = 0, cy = 0, r, fill = COLORS.black, holeFill = "#fff" }) {
 function Pin({ x, y, dx, dy, rot, delay, stripe = COLORS.yellow }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <g className="strike-pin" style={{ "--dx": `${dx}px`, "--dy": `${dy}px`, "--rot": `${rot}deg`, animationDelay: `${delay}s` }}>
-        <rect x={-3.5} y={-10} width="7" height="20" rx="3.5" fill="#fff" />
-        <rect x={-3.5} y={-5} width="7" height="3" fill={stripe} />
+      <g
+        className="strike-pin"
+        style={{
+          "--dx": `${dx}px`,
+          "--dy": `${dy}px`,
+          "--rot": `${rot}deg`,
+          animationDelay: `${delay}s`,
+          filter: "drop-shadow(0 2px 3px rgba(0,0,0,.5))",
+        }}
+      >
+        <rect x={-4} y={-11} width="8" height="22" rx="4" fill="#fff" stroke={COLORS.black} strokeWidth="1.3" />
+        <rect x={-4} y={-5.5} width="8" height="3.5" fill={stripe} stroke={COLORS.black} strokeWidth="0.6" />
       </g>
     </g>
   );
@@ -36,18 +45,19 @@ function Pin({ x, y, dx, dy, rot, delay, stripe = COLORS.yellow }) {
 
 // Volledig 10-kegel bowlingrek (klassieke driehoek), apex naar links — de
 // bal rolt van links naar rechts en raakt 'm daar als eerste. dx/dy zijn de
-// richtingen waarin elke kegel uit elkaar spat bij impact.
+// richtingen waarin elke kegel uit elkaar spat bij impact — ver genoeg om
+// echt dwars door het beeld te vliegen i.p.v. netjes rond de bal te blijven.
 const PIN_LAYOUT = [
-  { x: 0, y: 0, dx: -75, dy: 0, rot: -200 },
-  { x: 15, y: -9, dx: -55, dy: -58, rot: 250, delay: 0.02 },
-  { x: 15, y: 9, dx: -55, dy: 58, rot: -250, delay: 0.03 },
-  { x: 30, y: -18, dx: -20, dy: -90, rot: 310, delay: 0.05 },
-  { x: 30, y: 0, dx: 15, dy: -80, rot: -190, delay: 0.01 },
-  { x: 30, y: 18, dx: -20, dy: 90, rot: -310, delay: 0.06 },
-  { x: 45, y: -27, dx: 35, dy: -95, rot: 270, delay: 0.08 },
-  { x: 45, y: -9, dx: 60, dy: -42, rot: -230, delay: 0.04 },
-  { x: 45, y: 9, dx: 60, dy: 42, rot: 230, delay: 0.07 },
-  { x: 45, y: 27, dx: 35, dy: 95, rot: -270, delay: 0.09 },
+  { x: 0, y: 0, dx: -170, dy: 0, rot: -380 },
+  { x: 15, y: -9, dx: -125, dy: -132, rot: 460, delay: 0.02 },
+  { x: 15, y: 9, dx: -125, dy: 132, rot: -460, delay: 0.03 },
+  { x: 30, y: -18, dx: -45, dy: -205, rot: 560, delay: 0.05 },
+  { x: 30, y: 0, dx: 35, dy: -180, rot: -340, delay: 0.01 },
+  { x: 30, y: 18, dx: -45, dy: 205, rot: -560, delay: 0.06 },
+  { x: 45, y: -27, dx: 80, dy: -215, rot: 480, delay: 0.08 },
+  { x: 45, y: -9, dx: 135, dy: -95, rot: -420, delay: 0.04 },
+  { x: 45, y: 9, dx: 135, dy: 95, rot: 420, delay: 0.07 },
+  { x: 45, y: 27, dx: 80, dy: 215, rot: -480, delay: 0.09 },
 ];
 
 const CONFETTI_COLORS = [COLORS.yellow, COLORS.lightBlue, "#fff", "#ff6b6b", "#2e8b57"];
@@ -126,20 +136,25 @@ export function StrikeCelebration({ variantIndex = 0 }) {
             </g>
           </g>
         </svg>
-        <div
-          className="strike-badge cy-black"
-          style={{
-            background: v.badgeBg,
-            color: v.badgeColor,
-            fontSize: "clamp(28px, 9vw, 40px)",
-            padding: "16px 32px",
-            borderRadius: 14,
-            boxShadow: "0 10px 32px rgba(0,0,0,.4)",
-            letterSpacing: 1,
-            whiteSpace: "nowrap",
-          }}
-        >
-          STRIKE! {v.emoji}
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="strike-badge-burst" style={{ position: "absolute", width: 90, height: 90, borderRadius: "50%", background: v.badgeBg }} />
+          <div
+            className="strike-badge cy-black"
+            style={{
+              position: "relative",
+              background: v.badgeBg,
+              color: v.badgeColor,
+              fontSize: "clamp(28px, 9vw, 40px)",
+              padding: "16px 32px",
+              borderRadius: 14,
+              border: `3px solid ${v.badgeColor}`,
+              boxShadow: `0 10px 32px rgba(0,0,0,.45), 0 0 0 6px rgba(255,255,255,.25)`,
+              letterSpacing: 1,
+              whiteSpace: "nowrap",
+            }}
+          >
+            STRIKE! {v.emoji}
+          </div>
         </div>
       </div>
     </div>

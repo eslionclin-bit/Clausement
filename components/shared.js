@@ -44,11 +44,11 @@ export function GlobalStyle() {
       @keyframes strikeOverlayFade {
         0% { opacity: 0; }
         6% { opacity: 1; }
-        82% { opacity: 1; }
+        80% { opacity: 1; }
         100% { opacity: 0; }
       }
       .strike-overlay {
-        animation: strikeOverlayFade 2.6s ease both;
+        animation: strikeOverlayFade 2.8s ease both;
       }
       @keyframes screenFlash {
         0% { opacity: 0; }
@@ -59,14 +59,22 @@ export function GlobalStyle() {
         animation: screenFlash 1.1s ease-out both;
       }
       @keyframes strikePop {
-        0% { transform: scale(0.3) rotate(-12deg); opacity: 0; }
-        45% { transform: scale(1.3) rotate(4deg); opacity: 1; }
-        65% { transform: scale(0.94) rotate(-2deg); }
-        82% { transform: scale(1.08) rotate(1deg); }
+        0% { transform: scale(0.2) rotate(-16deg); opacity: 0; }
+        45% { transform: scale(1.45) rotate(5deg); opacity: 1; }
+        65% { transform: scale(0.9) rotate(-3deg); }
+        82% { transform: scale(1.12) rotate(1.5deg); }
         100% { transform: scale(1) rotate(0deg); opacity: 1; }
       }
       .strike-badge {
-        animation: strikePop .7s cubic-bezier(.34,1.6,.5,1) .6s both;
+        animation: strikePop .75s cubic-bezier(.34,1.6,.5,1) .58s both;
+      }
+      @keyframes badgeBurst {
+        0%, 56% { transform: scale(0.2); opacity: 0; }
+        64% { transform: scale(1); opacity: .55; }
+        100% { transform: scale(3.4); opacity: 0; }
+      }
+      .strike-badge-burst {
+        animation: badgeBurst .85s ease-out .56s both;
       }
       @keyframes strikeBallRoll {
         0% { transform: translateX(-150px) rotate(0deg); opacity: 0; }
@@ -91,10 +99,11 @@ export function GlobalStyle() {
       }
       @keyframes pinScatter {
         0%, 55% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+        88% { opacity: 1; }
         100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
       }
       .strike-pin {
-        animation: pinScatter .95s ease-in both;
+        animation: pinScatter 1.3s cubic-bezier(.15,.7,.25,1) both;
         transform-box: fill-box;
         transform-origin: center;
       }
@@ -126,7 +135,7 @@ export function GlobalStyle() {
         animation: fadeInUp .4s ease both;
       }
       @media (prefers-reduced-motion: reduce) {
-        .strike-overlay, .strike-flash, .strike-badge, .strike-ball, .strike-impact, .strike-pin, .confetti-piece, .loading-ball, .fade-in {
+        .strike-overlay, .strike-flash, .strike-badge, .strike-badge-burst, .strike-ball, .strike-impact, .strike-pin, .confetti-piece, .loading-ball, .fade-in {
           animation: none !important;
         }
       }
