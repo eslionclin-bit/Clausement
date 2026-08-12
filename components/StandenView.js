@@ -9,7 +9,7 @@ import { Empty, RankBadge, inputStyle } from "./shared";
 function PuntenUitleg() {
   const [open, setOpen] = useState(false);
   const items = [
-    ["Openingsspel", "Punten voor je plaats in het openingsspelletje. Winnaar krijgt het hoogst, elke plek daarna 1 punt minder."],
+    ["Openingsspel", "Punten voor het openingsspelletje — hoe dat verdeeld wordt hangt af van de opzet van die avond (bv. bij een klassement de winnaar het hoogst en elke plek daarna 1 punt minder, of bij twee teams alleen punten voor het winnende team)."],
     ["Doel", "Punten voor je persoonlijke Recordboek-doel: vul bij Invoeren je score van vandaag in. 1 punt voor een eerlijke poging, 1 extra punt als de app ziet dat je je eigen record verbeterde. Die extra bonus telt maar 1x per cyclus (~4 weken) — zo levert een makkelijk te verbeteren oefening niet structureel meer punten op dan een moeilijkere."],
     ["Wedstrijd", "3 punten als je het partijtje van die avond hebt gewonnen, 0 bij verlies of niet gespeeld."],
   ];
