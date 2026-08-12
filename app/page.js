@@ -250,20 +250,6 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
             onSetGoal={data.setGoal}
           />
         )}
-
-        {isTrainer && (
-          <div style={{ textAlign: "center", marginTop: 24 }}>
-            <a
-              href="/trainingsbord.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="cy-regular"
-              style={{ color: COLORS.blue, fontSize: 12, textDecoration: "underline" }}
-            >
-              Trainingsbord (korfbal) openen →
-            </a>
-          </div>
-        )}
       </div>
 
       <div className="stripe" style={{ height: 3, marginTop: 12 }} />
