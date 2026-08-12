@@ -41,46 +41,74 @@ export function GlobalStyle() {
       .stripe {
         background: #1c1b5c;
       }
+      @keyframes strikeOverlayFade {
+        0% { opacity: 0; }
+        6% { opacity: 1; }
+        82% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+      .strike-overlay {
+        animation: strikeOverlayFade 2.6s ease both;
+      }
+      @keyframes screenFlash {
+        0% { opacity: 0; }
+        18% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+      .strike-flash {
+        animation: screenFlash 1.1s ease-out both;
+      }
       @keyframes strikePop {
-        0% { transform: scale(0.6) rotate(-8deg); opacity: 0; }
-        35% { transform: scale(1.15) rotate(3deg); opacity: 1; }
-        60% { transform: scale(1) rotate(0deg); }
-        100% { transform: scale(1) rotate(0deg); opacity: 0; }
+        0% { transform: scale(0.3) rotate(-12deg); opacity: 0; }
+        45% { transform: scale(1.3) rotate(4deg); opacity: 1; }
+        65% { transform: scale(0.94) rotate(-2deg); }
+        82% { transform: scale(1.08) rotate(1deg); }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
       }
       .strike-badge {
-        animation: strikePop 1.6s ease .75s both;
+        animation: strikePop .7s cubic-bezier(.34,1.6,.5,1) .6s both;
       }
       @keyframes strikeBallRoll {
-        0% { transform: translateX(-110px) rotate(0deg); opacity: 0; }
+        0% { transform: translateX(-150px) rotate(0deg); opacity: 0; }
         7% { opacity: 1; }
-        62% { transform: translateX(0) rotate(430deg); opacity: 1; }
-        100% { transform: translateX(0) rotate(430deg); opacity: 1; }
+        58% { transform: translateX(0) rotate(620deg); opacity: 1; }
+        100% { transform: translateX(0) rotate(620deg); opacity: 1; }
       }
       .strike-ball {
-        animation: strikeBallRoll 1.2s cubic-bezier(.3,.9,.4,1) both;
+        animation: strikeBallRoll 1.05s cubic-bezier(.3,.9,.4,1) both;
         transform-box: fill-box;
         transform-origin: center;
       }
-      @keyframes pinScatterA {
-        0%, 58% { transform: translate(0,0) rotate(0deg); opacity: 1; }
-        100% { transform: translate(14px,-16px) rotate(80deg); opacity: 0; }
+      @keyframes impactRing {
+        0%, 55% { transform: scale(0); opacity: 0; }
+        60% { transform: scale(0.3); opacity: .9; }
+        100% { transform: scale(3); opacity: 0; }
       }
-      @keyframes pinScatterB {
-        0%, 58% { transform: translate(0,0) rotate(0deg); opacity: 1; }
-        100% { transform: translate(-8px,-20px) rotate(-70deg); opacity: 0; }
+      .strike-impact {
+        animation: impactRing .8s ease-out .52s both;
+        transform-box: fill-box;
+        transform-origin: center;
       }
-      @keyframes pinScatterC {
-        0%, 58% { transform: translate(0,0) rotate(0deg); opacity: 1; }
-        100% { transform: translate(20px,-6px) rotate(100deg); opacity: 0; }
+      @keyframes pinScatter {
+        0%, 55% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
       }
-      @keyframes pinScatterD {
-        0%, 58% { transform: translate(0,0) rotate(0deg); opacity: 1; }
-        100% { transform: translate(-4px,-22px) rotate(-110deg); opacity: 0; }
+      .strike-pin {
+        animation: pinScatter .95s ease-in both;
+        transform-box: fill-box;
+        transform-origin: center;
       }
-      .strike-pin-a { animation: pinScatterA .8s ease-in .7s both; transform-box: fill-box; transform-origin: center; }
-      .strike-pin-b { animation: pinScatterB .8s ease-in .74s both; transform-box: fill-box; transform-origin: center; }
-      .strike-pin-c { animation: pinScatterC .8s ease-in .66s both; transform-box: fill-box; transform-origin: center; }
-      .strike-pin-d { animation: pinScatterD .8s ease-in .78s both; transform-box: fill-box; transform-origin: center; }
+      @keyframes confettiBurst {
+        0%, 52% { transform: rotate(var(--angle)) translateX(0) rotate(0deg); opacity: 0; }
+        60% { opacity: 1; }
+        100% { transform: rotate(var(--angle)) translateX(var(--distance)) rotate(720deg); opacity: 0; }
+      }
+      .confetti-piece {
+        position: absolute;
+        top: 0;
+        left: 0;
+        animation: confettiBurst 1.3s cubic-bezier(.2,.8,.3,1) .48s both;
+      }
       @keyframes loadingBallRoll {
         0% { transform: translateX(0) rotate(0deg); }
         100% { transform: translateX(95px) rotate(360deg); }
@@ -98,7 +126,7 @@ export function GlobalStyle() {
         animation: fadeInUp .4s ease both;
       }
       @media (prefers-reduced-motion: reduce) {
-        .strike-badge, .strike-ball, .strike-pin-a, .strike-pin-b, .strike-pin-c, .strike-pin-d, .loading-ball, .fade-in {
+        .strike-overlay, .strike-flash, .strike-badge, .strike-ball, .strike-impact, .strike-pin, .confetti-piece, .loading-ball, .fade-in {
           animation: none !important;
         }
       }

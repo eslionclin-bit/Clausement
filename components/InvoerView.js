@@ -5,7 +5,7 @@ import { COLORS } from "@/lib/constants";
 import { previewDoelPunten } from "@/lib/logic";
 import { daysBetween, todayISO } from "@/lib/util";
 import { Banner, Empty, Field, MiniNum, TextButton, inputStyle, usePrefersReducedMotion } from "./shared";
-import { StrikeCelebration } from "./BowlingAnimations";
+import { StrikeCelebration, strikeVariantCount } from "./BowlingAnimations";
 
 export default function InvoerView({ players, trainings, myName, goals, personalRecords, cycleBonuses, exercises, onSubmit, onDelete, saving, isTrainer, jumpToDate, onDirtyChange }) {
   const emptyRows = () => Object.fromEntries(players.map((p) => [p.id, { openingsspel: 0, doel: 0, doelRaw: "", wedstrijd: "" }]));
@@ -33,6 +33,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
   const [savedMsg, setSavedMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [showStrike, setShowStrike] = useState(false);
+  const [strikeVariant, setStrikeVariant] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
   const [showHistorie, setShowHistorie] = useState(false);
   const [openMonths, setOpenMonths] = useState(() => new Set([todayISO().slice(0, 7)]));
@@ -180,11 +181,12 @@ export default function InvoerView({ players, trainings, myName, goals, personal
     const basis = editingId ? "Training bijgewerkt" : "Training opgeslagen";
     setSavedMsg(result.anyRecord ? `${basis} — nieuw record! 🏆 ✓` : `${basis} ✓`);
     if (!reducedMotion) {
+      setStrikeVariant((v) => (v + 1) % strikeVariantCount());
       setShowStrike(true);
-      setTimeout(() => setShowStrike(false), 2800);
+      setTimeout(() => setShowStrike(false), 2600);
     }
     cancelEdit();
-    setTimeout(() => setSavedMsg(""), !reducedMotion ? 3200 : 2500);
+    setTimeout(() => setSavedMsg(""), !reducedMotion ? 3000 : 2500);
   }
 
   async function handleDelete(id) {
@@ -215,7 +217,7 @@ export default function InvoerView({ players, trainings, myName, goals, personal
           )}
         </div>
       </div>
-      {showStrike && <StrikeCelebration />}
+      {showStrike && <StrikeCelebration variantIndex={strikeVariant} />}
       {editingId && !bewerkbaarNu && (
         <Banner tone="yellow">
           Deze training is niet meer op dezelfde dag ingevoerd, dus kan je 'm als speler niet meer wijzigen —
