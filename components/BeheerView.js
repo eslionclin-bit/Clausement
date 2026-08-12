@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { COLORS } from "@/lib/constants";
 import { aantalKeerGeoefend } from "@/lib/logic";
 import { daysBetween, todayISO } from "@/lib/util";
@@ -123,6 +123,21 @@ export default function BeheerView({
 }) {
   const [naam, setNaam] = useState("");
   const [showLog, setShowLog] = useState(false);
+  const [toonVorigeSeizoenen, setToonVorigeSeizoenen] = useState(false);
+
+  // Bij een "seizoen gestart"-regel begint het huidige seizoen — laat het
+  // logboek standaard alleen dát seizoen zien (fraudecontrole blijft
+  // functioneren, maar het loopt niet vol met seizoenen oude regels). De
+  // volledige geschiedenis blijft altijd opvraagbaar via de toggle hieronder.
+  const laatsteSeizoenStart = useMemo(() => {
+    const starts = auditLog.filter((l) => l.action === "seizoen gestart");
+    if (starts.length === 0) return null;
+    return [...starts].sort((a, b) => (a.at < b.at ? 1 : -1))[0];
+  }, [auditLog]);
+  const zichtbareLog =
+    laatsteSeizoenStart && !toonVorigeSeizoenen
+      ? auditLog.filter((l) => l.at >= laatsteSeizoenStart.at)
+      : auditLog;
   const [showBackup, setShowBackup] = useState(false);
   const [backupMsg, setBackupMsg] = useState("");
   const [teamGoalInput, setTeamGoalInput] = useState(teamGoal ?? "");
@@ -359,8 +374,8 @@ export default function BeheerView({
             Dit wist definitief het Recordboek (totalen, persoonlijke records, doel-geschiedenis, huidige
             doelen) en alle periodes — het Clausement begint weer bij Periode 1. Oude seizoensdata blijft
             daarna niet meer zichtbaar of vergelijkbaar in de app. Spelers, oefeningen, teamdoel en het
-            logboek blijven wel gewoon staan. Exporteer hierboven eerst een backup als je de oude stand wil
-            bewaren.
+            logboek blijven wel gewoon staan (het logboek toont hierna standaard weer alleen het nieuwe
+            seizoen). Exporteer hierboven eerst een backup als je de oude stand wil bewaren.
           </div>
           <div style={{ marginBottom: 10 }}>
             <div className="cy-regular" style={{ fontSize: 11, color: "#555", marginBottom: 4 }}>Startdatum nieuwe Periode 1</div>
@@ -403,12 +418,20 @@ export default function BeheerView({
         className="cy-medium"
         style={{ width: "100%", marginTop: 12, background: "none", border: `1.5px solid ${COLORS.blue}`, color: COLORS.blue, borderRadius: 6, padding: "10px 8px", fontSize: 13, cursor: "pointer" }}
       >
-        {showLog ? "Logboek verbergen" : `Logboek (${auditLog.length}) — wie heeft wat ingevoerd`}
+        {showLog ? "Logboek verbergen" : `Logboek (${zichtbareLog.length}) — wie heeft wat ingevoerd`}
       </button>
       {showLog && (
         <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10, maxHeight: 380, overflowY: "auto" }}>
-          {auditLog.length === 0 && <Empty text="Nog geen wijzigingen gelogd." />}
-          {[...auditLog].reverse().map((log) => (
+          {laatsteSeizoenStart && (
+            <TextButton
+              onClick={() => setToonVorigeSeizoenen((v) => !v)}
+              style={{ fontSize: 11, color: COLORS.blue, alignSelf: "flex-start" }}
+            >
+              {toonVorigeSeizoenen ? "toon alleen huidig seizoen" : "toon ook vorige seizoenen"}
+            </TextButton>
+          )}
+          {zichtbareLog.length === 0 && <Empty text="Nog geen wijzigingen gelogd." />}
+          {[...zichtbareLog].reverse().map((log) => (
             <div key={log.id} style={{ background: COLORS.white, borderRadius: 4, padding: "8px 10px" }}>
               <div className="cy-regular" style={{ fontSize: 11.5, color: "#555", display: "flex", justifyContent: "space-between", gap: 8 }}>
                 <span>

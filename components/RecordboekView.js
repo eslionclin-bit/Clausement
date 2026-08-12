@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { COLORS } from "@/lib/constants";
 import { aantalKeerGeoefend, doelGeschiedenisVoorSpeler, doelPerPeriode } from "@/lib/logic";
 import { addDays, todayISO } from "@/lib/util";
@@ -26,13 +26,28 @@ function TeamVoortgang({ teamGoalProgress, teamGoal }) {
   );
 }
 
-function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise, onUpdateCustomExercise, onDeleteCustomExercise, isTrainer }) {
+function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise, onUpdateCustomExercise, onDeleteCustomExercise, myName, isTrainer, dark = true }) {
   const [showOefeningen, setShowOefeningen] = useState(false);
   const [editingExerciseId, setEditingExerciseId] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   const baseCategorieen = [...new Set(exercises.filter((e) => !e.isCustom).map((ex) => ex.cat))];
   const leegOefeningForm = { cat: baseCategorieen[0] || "Eigen accent", station: "Vrij", name: "", metric: "", higherIsBetter: true, desc: "" };
   const [oefeningForm, setOefeningForm] = useState(leegOefeningForm);
+
+  // Binnen het blauwe "MIJN HUIDIGE DOEL"-blok (dark=true) moet dit leesbaar
+  // zijn op de donkere achtergrond; als trainer-fallback buiten dat blok
+  // (dark=false, trainers hebben geen eigen doel/blauw blok) gelden de
+  // normale lichte kleuren van de rest van de pagina.
+  const toonKleur = dark ? COLORS.white : COLORS.black;
+  const zachtKleur = dark ? COLORS.lightBlue : "#6b6b6b";
+  const rijAchtergrond = dark ? "rgba(255,255,255,.08)" : COLORS.white;
+  const toggleBorder = dark ? COLORS.lightBlue : COLORS.blue;
+  const wijzigKleur = dark ? COLORS.yellow : COLORS.blue;
+  const verwijderKleur = dark ? "#ff8a8a" : "#c0392b";
+
+  function magWijzigen(ex) {
+    return isTrainer || !ex.createdBy || ex.createdBy === myName;
+  }
 
   function startEditOefening(ex) {
     setEditingExerciseId(ex.id);
@@ -59,21 +74,21 @@ function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise
   }
 
   return (
-    <div style={{ marginTop: 20, marginBottom: 20 }}>
+    <div style={{ marginTop: 14 }}>
       {errorMsg && <Banner tone="yellow">{errorMsg}</Banner>}
       <button
         onClick={() => setShowOefeningen((v) => !v)}
         className="cy-medium"
-        style={{ width: "100%", background: "none", border: `1.5px solid ${COLORS.blue}`, color: COLORS.blue, borderRadius: 6, padding: "10px 8px", fontSize: 13, cursor: "pointer" }}
+        style={{ width: "100%", background: "none", border: `1.5px solid ${toggleBorder}`, color: toonKleur, borderRadius: 6, padding: "10px 8px", fontSize: 13, cursor: "pointer" }}
       >
         {showOefeningen ? "Eigen oefeningen verbergen" : `Eigen Recordboek-oefeningen (${customExercises.length}) — toevoegen/wijzigen`}
       </button>
       {showOefeningen && (
         <div style={{ marginTop: 10 }}>
-          <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 10, lineHeight: 1.5 }}>
+          <div className="cy-regular" style={{ fontSize: 11, color: zachtKleur, marginBottom: 10, lineHeight: 1.5 }}>
             De basisoefeningen uit het Handboek staan vast. Hier voeg je eigen extra oefeningen toe —
-            handig voor een individueel accent dat nog niet in de lijst staat. Eigen oefeningen kun je
-            later altijd nog wijzigen — door wie dan ook in het team. Verwijderen kan alleen de trainer.
+            handig voor een individueel accent dat nog niet in de lijst staat. Alleen jijzelf (of de
+            trainer) kan een eigen oefening later nog wijzigen; verwijderen kan alleen de trainer.
           </div>
 
           <div style={{ background: COLORS.white, borderRadius: 6, padding: 10, marginBottom: 12 }}>
@@ -131,15 +146,17 @@ function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {customExercises.length === 0 && <div className="cy-regular" style={{ fontSize: 12, color: "#6b6b6b" }}>Nog geen eigen oefeningen toegevoegd.</div>}
+            {customExercises.length === 0 && <div className="cy-regular" style={{ fontSize: 12, color: zachtKleur }}>Nog geen eigen oefeningen toegevoegd.</div>}
             {customExercises.map((ex) => (
-              <div key={ex.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: COLORS.white, borderRadius: 6, padding: "8px 10px" }}>
+              <div key={ex.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: rijAchtergrond, borderRadius: 6, padding: "8px 10px" }}>
                 <div>
-                  <div className="cy-medium" style={{ fontSize: 13 }}>{ex.name}</div>
-                  <div className="cy-regular" style={{ fontSize: 10.5, color: "#6b6b6b" }}>{ex.cat} · {ex.station} · {ex.metric}</div>
+                  <div className="cy-medium" style={{ fontSize: 13, color: toonKleur }}>{ex.name}</div>
+                  <div className="cy-regular" style={{ fontSize: 10.5, color: zachtKleur }}>{ex.cat} · {ex.station} · {ex.metric}</div>
                 </div>
                 <div style={{ display: "flex", gap: 10 }}>
-                  <TextButton onClick={() => startEditOefening(ex)} style={{ fontSize: 12, color: COLORS.blue }}>wijzigen</TextButton>
+                  {magWijzigen(ex) && (
+                    <TextButton onClick={() => startEditOefening(ex)} style={{ fontSize: 12, color: wijzigKleur }}>wijzigen</TextButton>
+                  )}
                   {isTrainer && (
                     <TextButton
                       onClick={async () => {
@@ -148,7 +165,7 @@ function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise
                           if (!result.ok) setErrorMsg(result.message);
                         }
                       }}
-                      style={{ fontSize: 12, color: "#c0392b" }}
+                      style={{ fontSize: 12, color: verwijderKleur }}
                     >
                       verwijderen
                     </TextButton>
@@ -165,8 +182,23 @@ function EigenOefeningenBeheer({ exercises, customExercises, onAddCustomExercise
 
 function PerOefeningRanglijst({ players, exercises, personalRecords }) {
   const [open, setOpen] = useState(false);
-  const [gekozenId, setGekozenId] = useState(exercises[0]?.id);
-  const ex = exercises.find((e) => e.id === gekozenId);
+
+  // Alleen oefeningen waar daadwerkelijk minstens 1 score voor is opgeslagen
+  // — een lange lijst met vrijwel overal "nog niemand" is niet nuttig.
+  const exercisesMetScore = useMemo(
+    () => exercises.filter((e) => players.some((p) => personalRecords[`${p.id}:${e.id}`] !== undefined)),
+    [exercises, players, personalRecords]
+  );
+
+  const [gekozenId, setGekozenId] = useState(exercisesMetScore[0]?.id);
+  useEffect(() => {
+    if (!exercisesMetScore.some((e) => e.id === gekozenId)) {
+      setGekozenId(exercisesMetScore[0]?.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exercisesMetScore]);
+
+  const ex = exercisesMetScore.find((e) => e.id === gekozenId);
 
   const metScore = [];
   const zonderScore = [];
@@ -180,7 +212,7 @@ function PerOefeningRanglijst({ players, exercises, personalRecords }) {
   }
 
   const perCategorie = {};
-  exercises.forEach((e) => {
+  exercisesMetScore.forEach((e) => {
     perCategorie[e.cat] = perCategorie[e.cat] || [];
     perCategorie[e.cat].push(e);
   });
@@ -196,38 +228,42 @@ function PerOefeningRanglijst({ players, exercises, personalRecords }) {
       </button>
       {open && (
         <div style={{ marginTop: 10 }}>
-          <select value={gekozenId} onChange={(e) => setGekozenId(e.target.value)} style={{ ...inputStyle, marginBottom: 10 }}>
-            {Object.entries(perCategorie).map(([cat, exs]) => (
-              <optgroup key={cat} label={cat}>
-                {exs.map((e) => (
-                  <option key={e.id} value={e.id}>{e.name}</option>
+          {exercisesMetScore.length === 0 && <Empty text="Nog nergens een score voor ingevoerd." />}
+          {exercisesMetScore.length > 0 && (
+            <>
+              <select value={gekozenId} onChange={(e) => setGekozenId(e.target.value)} style={{ ...inputStyle, marginBottom: 10 }}>
+                {Object.entries(perCategorie).map(([cat, exs]) => (
+                  <optgroup key={cat} label={cat}>
+                    {exs.map((e) => (
+                      <option key={e.id} value={e.id}>{e.name}</option>
+                    ))}
+                  </optgroup>
                 ))}
-              </optgroup>
-            ))}
-          </select>
+              </select>
 
-          {ex && (
-            <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 10 }}>
-              Gerangschikt op: {ex.metric}
-            </div>
-          )}
+              {ex && (
+                <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 10 }}>
+                  Gerangschikt op: {ex.metric}
+                </div>
+              )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {metScore.length === 0 && <Empty text="Nog niemand heeft hier een score voor ingevoerd." />}
-            {metScore.map((r, i) => (
-              <div key={r.player.id} style={{ display: "flex", alignItems: "center", gap: 10, background: COLORS.white, borderRadius: 6, padding: "8px 10px" }}>
-                <RankBadge rank={i + 1} />
-                <div style={{ flex: 1 }} className="cy-medium">{r.player.name}</div>
-                <div className="tile-num" style={{ fontSize: 16, color: COLORS.blue }}>{r.waarde}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {metScore.map((r, i) => (
+                  <div key={r.player.id} style={{ display: "flex", alignItems: "center", gap: 10, background: COLORS.white, borderRadius: 6, padding: "8px 10px" }}>
+                    <RankBadge rank={i + 1} />
+                    <div style={{ flex: 1 }} className="cy-medium">{r.player.name}</div>
+                    <div className="tile-num" style={{ fontSize: 16, color: COLORS.blue }}>{r.waarde}</div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {zonderScore.length > 0 && (
-            <div style={{ marginTop: 10 }}>
-              <div className="cy-medium" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 4 }}>NOG NIET GEPROBEERD</div>
-              <div className="cy-regular" style={{ fontSize: 11.5, color: "#6b6b6b" }}>{zonderScore.map((p) => p.name).join(", ")}</div>
-            </div>
+              {zonderScore.length > 0 && (
+                <div style={{ marginTop: 10 }}>
+                  <div className="cy-medium" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 4 }}>NOG NIET GEPROBEERD</div>
+                  <div className="cy-regular" style={{ fontSize: 11.5, color: "#6b6b6b" }}>{zonderScore.map((p) => p.name).join(", ")}</div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -457,6 +493,16 @@ export default function RecordboekView({
               </div>
             </div>
           )}
+
+          <EigenOefeningenBeheer
+            exercises={exercises}
+            customExercises={customExercises}
+            onAddCustomExercise={onAddCustomExercise}
+            onUpdateCustomExercise={onUpdateCustomExercise}
+            onDeleteCustomExercise={onDeleteCustomExercise}
+            myName={myName}
+            isTrainer={isTrainer}
+          />
         </div>
       )}
 
@@ -528,14 +574,18 @@ export default function RecordboekView({
         })}
       </div>
 
-      <EigenOefeningenBeheer
-        exercises={exercises}
-        customExercises={customExercises}
-        onAddCustomExercise={onAddCustomExercise}
-        onUpdateCustomExercise={onUpdateCustomExercise}
-        onDeleteCustomExercise={onDeleteCustomExercise}
-        isTrainer={isTrainer}
-      />
+      {!mijnSpeler && (
+        <EigenOefeningenBeheer
+          exercises={exercises}
+          customExercises={customExercises}
+          onAddCustomExercise={onAddCustomExercise}
+          onUpdateCustomExercise={onUpdateCustomExercise}
+          onDeleteCustomExercise={onDeleteCustomExercise}
+          myName={myName}
+          isTrainer={isTrainer}
+          dark={false}
+        />
+      )}
 
       {isTrainer && <PerOefeningRanglijst players={players} exercises={exercises} personalRecords={personalRecords} />}
     </div>

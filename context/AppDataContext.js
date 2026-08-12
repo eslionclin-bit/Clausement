@@ -42,6 +42,7 @@ function reshapeExercise(e) {
     higherIsBetter: e.higher_is_better,
     desc: e.description,
     isCustom: e.is_custom,
+    createdBy: e.created_by,
   };
 }
 
@@ -313,15 +314,14 @@ export function AppDataProvider({ children }) {
   }
 
   async function addCustomExercise(exercise) {
-    const { error: err } = await supabase.from("exercises").insert({
-      id: `custom-${crypto.randomUUID()}`,
-      cat: exercise.cat,
-      station: exercise.station,
-      name: exercise.name,
-      metric: exercise.metric,
-      higher_is_better: exercise.higherIsBetter,
-      description: exercise.desc,
-      is_custom: true,
+    const { error: err } = await supabase.rpc("add_custom_exercise", {
+      p_actor: myName,
+      p_cat: exercise.cat,
+      p_station: exercise.station,
+      p_name: exercise.name,
+      p_metric: exercise.metric,
+      p_higher_is_better: exercise.higherIsBetter,
+      p_desc: exercise.desc,
     });
     if (err) return { ok: false, message: err.message };
     await load();
@@ -329,17 +329,16 @@ export function AppDataProvider({ children }) {
   }
 
   async function updateCustomExercise(exercise) {
-    const { error: err } = await supabase
-      .from("exercises")
-      .update({
-        cat: exercise.cat,
-        station: exercise.station,
-        name: exercise.name,
-        metric: exercise.metric,
-        higher_is_better: exercise.higherIsBetter,
-        description: exercise.desc,
-      })
-      .eq("id", exercise.id);
+    const { error: err } = await supabase.rpc("update_custom_exercise", {
+      p_id: exercise.id,
+      p_actor: myName,
+      p_cat: exercise.cat,
+      p_station: exercise.station,
+      p_name: exercise.name,
+      p_metric: exercise.metric,
+      p_higher_is_better: exercise.higherIsBetter,
+      p_desc: exercise.desc,
+    });
     if (err) return { ok: false, message: err.message };
     await load();
     return { ok: true };
