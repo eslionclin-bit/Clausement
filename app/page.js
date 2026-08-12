@@ -178,8 +178,6 @@ function AppShell({ view, setView, jumpToDate, onEditTraining, invoerDirty, onIn
             periodStart={data.periodStart}
             periodNumber={data.periodNumber}
             periodHistory={data.periodHistory}
-            goals={data.goals}
-            goalHistory={data.goalHistory}
             exercises={data.exercises}
           />
         )}

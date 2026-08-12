@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { COLORS } from "@/lib/constants";
-import { computeStandings, doelGeschiedenisVoorSpeler, doelRegelsVoorPeriode } from "@/lib/logic";
+import { computeStandings, doelRegelsVoorPeriode } from "@/lib/logic";
 import { daysBetween, todayISO } from "@/lib/util";
 import { Empty, RankBadge, inputStyle } from "./shared";
 
@@ -40,7 +40,7 @@ function PuntenUitleg() {
   );
 }
 
-function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises, periodStart, periodEnd }) {
+function SpelerGeschiedenis({ player, trainings, exercises, periodStart, periodEnd }) {
   const inPeriode = (t) => t.date >= periodStart && (!periodEnd || t.date < periodEnd);
 
   const openingsspelRegels = [...trainings]
@@ -50,13 +50,6 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises, 
     .filter((t) => t.spelers?.[player.id]?.wedstrijd && inPeriode(t))
     .sort((a, b) => (a.date < b.date ? 1 : -1));
   const doelRegelsPeriode = doelRegelsVoorPeriode(trainings, player.id, periodStart, periodEnd, exercises);
-  const doelGeschiedenis = doelGeschiedenisVoorSpeler(
-    trainings,
-    player.id,
-    goalHistory[player.id] || [],
-    goals[player.id] || null,
-    exercises
-  );
 
   return (
     <div style={{ background: "#f7f7fb", borderRadius: "0 0 8px 8px", padding: "10px 12px", marginBottom: 4 }}>
@@ -80,17 +73,6 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises, 
         </div>
       ))}
 
-      <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginTop: 10, marginBottom: 4 }}>DOEL — TOEWIJZINGEN (heel seizoen)</div>
-      {doelGeschiedenis.length === 0 && (
-        <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b", marginBottom: 8 }}>Nog geen doel gekozen.</div>
-      )}
-      {[...doelGeschiedenis].reverse().map((h, i) => (
-        <div key={i} className="cy-regular" style={{ fontSize: 11, color: "#555" }}>
-          {h.assignment.exerciseName} ({h.assignment.chosenAt}
-          {h.eindDatum ? ` t/m ${h.eindDatum}` : " · huidig"}): {h.beste !== null ? `beste score ${h.beste}` : "nog geen score"}
-        </div>
-      ))}
-
       <div className="cy-medium" style={{ fontSize: 11.5, color: COLORS.blue, marginTop: 10, marginBottom: 4 }}>WEDSTRIJD</div>
       {wedstrijdRegels.length === 0 && (
         <div className="cy-regular" style={{ fontSize: 11, color: "#6b6b6b" }}>Nog geen wedstrijden in deze periode.</div>
@@ -104,7 +86,7 @@ function SpelerGeschiedenis({ player, trainings, goals, goalHistory, exercises, 
   );
 }
 
-export default function StandenView({ players, trainings, periodStart, periodNumber, periodHistory, goals, goalHistory, exercises }) {
+export default function StandenView({ players, trainings, periodStart, periodNumber, periodHistory, exercises }) {
   const periods = [
     { label: `Huidige periode (${periodNumber})`, start: periodStart, end: null },
     ...[...periodHistory].reverse().map((p) => ({ label: `Periode ${p.number} (${p.start} t/m ${p.end})`, start: p.start, end: p.end })),
@@ -182,8 +164,6 @@ export default function StandenView({ players, trainings, periodStart, periodNum
                 <SpelerGeschiedenis
                   player={r.player}
                   trainings={trainings}
-                  goals={goals}
-                  goalHistory={goalHistory}
                   exercises={exercises}
                   periodStart={actief.start}
                   periodEnd={actief.end}
